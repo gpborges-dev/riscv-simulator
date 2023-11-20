@@ -1,0 +1,11 @@
+main:
+addi x6, x0, 0
+addi x5, x0, 9
+addi x7, x0, 5
+bne x5, x7, else
+addi x6, x6, 7
+jal x0, fim
+else:
+addi x6, x6, 15
+fim:
+jalr x0, x1, 0
