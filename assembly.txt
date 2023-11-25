@@ -1,3 +1,11 @@
+.data
+teste1: .byte 0x12
+teste2: .word 0x80000000
+teste3:
+teste4:
+.string "Triste"
+teste5: .word 0xffffffff
+.text
 main:
 addi x6, x0, 0
 addi x5, x0, 9
