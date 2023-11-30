@@ -195,11 +195,11 @@ fn i_type(mnemonic : &str, args : &Vec<&str>) -> String {
                 }
             } else {
                 if -2048 <= num && num < 0 {
-                imm = format!("{:b}", num)[20..=31].to_string(); // se o número é negativo vai retornar mais de 12 bits
+                    imm = format!("{:b}", num)[20..=31].to_string(); // se o número é negativo vai retornar mais de 12 bits
                 } else if 0 <= num && num <= 2047 {
                     imm = format!("{:0>12b}", num); // se o número é positivo vai retornar certo
                 } else {
-                panic!("Immediate {imm} out of range for {mnemonic}")
+                    panic!("Immediate {imm} out of range for {mnemonic}")
                 }
             }
             rs1 = format!("{:0>5}", u32str_to_bin(&args[1][1..]));
@@ -207,10 +207,9 @@ fn i_type(mnemonic : &str, args : &Vec<&str>) -> String {
         } else {
             panic!("Arguments {:?} invalid for {mnemonic}", args) 
         }
-
     }
 
-    let opcode : String = String::from(if mnemonic.starts_with('l') {"0000011"} else {"0010011"});
+    let opcode : String = String::from(if mnemonic.starts_with('l') {"0000011"} else if mnemonic == "jalr" {"1100111"} else {"0010011"});
     let funct3_hash : HashMap<&str, &str> = HashMap::from([
         ("addi", "000"),
         ("slti", "010"),
@@ -226,6 +225,7 @@ fn i_type(mnemonic : &str, args : &Vec<&str>) -> String {
         ("lw", "010"),
         ("lbu", "100"),
         ("lhu", "101"),
+        ("jalr", "000")
     ]);
     let funct3 : String = funct3_hash[mnemonic].to_string();
     rd = format!("{:0>5}", u32str_to_bin(&args[0][1..]));
@@ -256,7 +256,7 @@ fn s_type(mnemonic : &str, args : &Vec<&str>) -> String {
             } else if 0 <= num && num <= 2047 {
                 imm = format!("{:0>12b}", num); // se o número é positivo vai retornar certo
             } else {
-            panic!("Immediate {imm} out of range for {mnemonic}")
+                panic!("Immediate {imm} out of range for {mnemonic}")
             }
         } 
         (_, _) => panic!("Arguments {:?} invalid for {mnemonic}", args) 
@@ -276,7 +276,7 @@ fn s_type(mnemonic : &str, args : &Vec<&str>) -> String {
     format!("{}{}{}{}{}{}\n", &imm[0..=6], rs2, rs1, funct3, &imm[7..], opcode)
 }
 
-fn b_type(mnemonic : &str, args : &Vec<&str>, text_hash : &HashMap<String, u32>, pc : &mut u32) -> String {
+fn b_type(mnemonic : &str, args : &Vec<&str>, text_hash : &HashMap<String, u32>, inst_addr : &u32) -> String {
     if args.len() != 3 || !is_reg(&args[0]) || !is_reg(&args[1]) || !text_hash.contains_key(args[2]) {
         panic!("Arguments {:?} invalid for {mnemonic}", args)
     }
@@ -294,27 +294,50 @@ fn b_type(mnemonic : &str, args : &Vec<&str>, text_hash : &HashMap<String, u32>,
     let rs1: String = format!("{:0>5}", u32str_to_bin(&args[0][1..]));        
     let rs2: String = format!("{:0>5}", u32str_to_bin(&args[1][1..]));
 
-    
-
     let branch_addr: u32 = text_hash[args[2]];
-    let offset : i32 = branch_addr as i32 - *pc as i32;
+    let offset : i32 = branch_addr as i32 - *inst_addr as i32;
     if !(-2048..=2047).contains(&offset) {
-        panic!("Offset {offset} must be 12 bits long")
+        panic!("Offset {offset} must be max 12 bits long")
     }
-    *pc = branch_addr;
-    let imm : String = format!("{:0>32}", i32str_to_bin(&offset.to_string()));
-
+    let imm : String = format!("{:0>32b}", offset);
     format!("{}{}{}{}{}{}{}{}\n", &imm.chars().nth(19).unwrap(), &imm[21..=26], rs2, rs1, funct3, &imm[27..=30], &imm.chars().nth(20).unwrap(), opcode)
 }
 
 fn u_type(mnemonic : &str, args : &Vec<&str>) -> String {
-    
-    format!("")
+    if args.len() != 2 || !is_reg(&args[0]) {
+        panic!("Arguments {:?} invalid for {mnemonic}", args)
+    }
+
+    let num = get_i32(&args[1]);
+    let mut imm : String = String::new();
+    if -524288 <= num && num < 0 {
+        imm = format!("{:b}", num)[12..=31].to_string();
+    } else if 0 <= num && num <= 524287 {
+        imm = format!("{:0>20b}", num).to_string();
+    } else {
+        panic!("Immediate {} must be max 20 bits long", args[1])
+    }
+
+    let opcode : String = String::from(if mnemonic == "lui" {"0110111"} else {"0010111"});
+    let rd : String = format!("{:0>5}", u32str_to_bin(&args[0][1..]));
+
+    format!("{imm}{rd}{opcode}\n")
 }
 
-fn j_type(mnemonic : &str, args : &Vec<&str>) -> String {
+fn j_type(mnemonic : &str, args : &Vec<&str>, text_hash : &HashMap<String, u32>, inst_addr : &u32) -> String {
+    if args.len() != 2 && is_reg(&args[0]) && !text_hash.contains_key(args[2]) {
+        panic!("Arguments {:?} invalid for {mnemonic}", args)
+    }
 
-    format!("")
+    let branch_addr: u32 = text_hash[args[1]];
+    let offset : i32 = branch_addr as i32 - *inst_addr as i32;
+    if !(-524288..=524287).contains(&offset) {
+        panic!("Offset {offset} must be max 20 bits long")
+    }
+    let opcode: String = String::from("1101111");
+    let rd : String = format!("{:0>5}", u32str_to_bin(&args[0][1..]));
+    let imm : String = format!("{:0>32b}", offset); // na hora de pegar os bits ele desloca um bit
+    format!("{}{}{}{}{}{}\n", &imm.chars().nth(11).unwrap(), &imm[21..=30], &imm.chars().nth(20).unwrap(), &imm[12..=19], rd, opcode)
 }
 
 fn format_code(code: &str) -> String {
@@ -576,8 +599,8 @@ fn translator(data: &Vec<&str>, text : &Vec<&str>, data_hash : &HashMap<String, 
     let j_mnemonics = ["jal"];
 
     let mut binaries : String = String::new();
-    let mut pc : u32 = TEXT_ADDR;
-    for instruction in text {
+    for (index, instruction) in text.iter().enumerate() {
+        let inst_addr: u32 = TEXT_ADDR + 4 * index as u32;
         let delimiter = instruction.find(' ');
         let mut mnemonic : &str = "";
         let mut args : Vec<&str> = Vec::new();
@@ -586,7 +609,7 @@ fn translator(data: &Vec<&str>, text : &Vec<&str>, data_hash : &HashMap<String, 
             args = instruction[d+1..].split(',').map(|arg| arg.trim()).collect();
         } else {
             panic!("Instruction {instruction} not valid")
-        } 
+        }
 
         if r_mnemonics.iter().any(|m| m == &mnemonic) {
             binaries.push_str(&r_type(&mnemonic, &args));
@@ -595,16 +618,14 @@ fn translator(data: &Vec<&str>, text : &Vec<&str>, data_hash : &HashMap<String, 
         } else if s_mnemonics.iter().any(|m| m == &mnemonic) {
             binaries.push_str(&s_type(&mnemonic, &args));
         } else if b_mnemonics.iter().any(|m| m == &mnemonic) {
-            binaries.push_str(&b_type(&mnemonic, &args, &text_hash, &mut pc));
+            binaries.push_str(&b_type(&mnemonic, &args, &text_hash, &inst_addr));
         } else if u_mnemonics.iter().any(|m| m == &mnemonic) {
             binaries.push_str(&u_type(&mnemonic, &args));
         } else if j_mnemonics.iter().any(|m| m == &mnemonic) {
-            binaries.push_str(&j_type(&mnemonic, &args));
+            binaries.push_str(&j_type(&mnemonic, &args, &text_hash, &inst_addr));
         } else {
             panic!("Invalid mnemonic {mnemonic}")
         }
-
-        pc += 4;
     }
     println!("{binaries}");
     binaries

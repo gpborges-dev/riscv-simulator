@@ -1,5 +1,9 @@
-beq x9, x10, main
-sb x1, 0(x0)
-sh x2, 0x7ff(x2)
+inicio:
+jal x1, main
+beq x1, x2, main
+auipc x2, 30
+jalr x1, x2, -982
 main:
-sw x3, 0x7FF(x2)
+lui x2, -70
+jal x2, inicio
+bne x1, x2, inicio
