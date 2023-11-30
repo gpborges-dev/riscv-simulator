@@ -621,7 +621,7 @@ use std::io::{self, BufRead};
 fn main() -> io::Result<()>{
     // let args : Vec<String> = std::env::args().collect();
     // pre_translator(&args[1]);
-    let file = File::open("assembly.txt")?;
+    let file = File::open("text.txt")?;
     let reader = io::BufReader::new(file);
 
     // Itera sobre cada linha do arquivo e imprime
