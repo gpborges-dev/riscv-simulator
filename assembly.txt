@@ -1,8 +1,11 @@
 inicio:
 jal x1, main
 beq x1, x2, main
+
+
+
 auipc x2, 30
-jalr x1, x2, -982
+jalr x1, x2, 0x89
 main:
 lui x2, -70
 jal x2, inicio
