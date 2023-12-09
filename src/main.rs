@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::{self, BufRead};
+use std::process;
 
 mod assembler;
 // mod cpu;
@@ -47,7 +48,8 @@ impl Cpu<'_> {
             self.memory.read_text_word(self.pc as usize)
         );
         self.inst = self.memory.read_text_word(self.pc as usize);
-        println!("self.inst: {:b}", self.inst as u32);
+        println!("self.inst: {:032b}", self.inst as u32);
+        self.pc += 1;
     }
     fn decode(&mut self, instruction: u32) -> () {
         let opcode = instruction & 0x7F;
@@ -106,7 +108,6 @@ impl Cpu<'_> {
                             let rs2 = self.breg.get_reg(self.instruction.rs2);
                             let rd = rs1 + rs2;
                             self.breg.set_reg(self.instruction.rd, rd);
-                            self.breg.print_reg();
                         }
                         0x1 => {
                             // println!("Instrução MUL");
@@ -115,7 +116,6 @@ impl Cpu<'_> {
                             let rs2 = self.breg.get_reg(self.instruction.rs2);
                             let rd = rs1 * rs2;
                             self.breg.set_reg(self.instruction.rd, rd);
-                            self.breg.print_reg();
                         }
                         0x20 => {
                             // println!("Instrução SUB");
@@ -123,7 +123,6 @@ impl Cpu<'_> {
                             let rs2 = self.breg.get_reg(self.instruction.rs2);
                             let rd = rs1 - rs2;
                             self.breg.set_reg(self.instruction.rd, rd);
-                            self.breg.print_reg();
                         }
                         _ => {
                             println!("Instrução não implementada");
@@ -135,7 +134,6 @@ impl Cpu<'_> {
                         let rs2 = self.breg.get_reg(self.instruction.rs2);
                         let rd = rs1 << rs2;
                         self.breg.set_reg(self.instruction.rd, rd);
-                        self.breg.print_reg();
                     }
                     0x2 => {
                         // println!("Instrução SLT");
@@ -143,7 +141,6 @@ impl Cpu<'_> {
                         let rs2 = self.breg.get_reg(self.instruction.rs2) as i32;
                         let rd = if rs1 < rs2 { 1 } else { 0 };
                         self.breg.set_reg(self.instruction.rd, rd);
-                        self.breg.print_reg();
                     }
                     0x3 => {
                         // println!("Instrução SLTU");
@@ -151,7 +148,6 @@ impl Cpu<'_> {
                         let rs2 = self.breg.get_reg(self.instruction.rs2) as u32;
                         let rd = if rs1 < rs2 { 1 } else { 0 };
                         self.breg.set_reg(self.instruction.rd, rd);
-                        self.breg.print_reg();
                     }
                     0x4 => {
                         // println!("Instrução XOR");
@@ -159,7 +155,6 @@ impl Cpu<'_> {
                         let rs2 = self.breg.get_reg(self.instruction.rs2);
                         let rd = rs1 ^ rs2;
                         self.breg.set_reg(self.instruction.rd, rd);
-                        self.breg.print_reg();
                     }
                     0x5 => {
                         // println!("Instrução SRL");
@@ -167,7 +162,6 @@ impl Cpu<'_> {
                         let rs2 = self.breg.get_reg(self.instruction.rs2);
                         let rd = rs1 >> rs2;
                         self.breg.set_reg(self.instruction.rd, rd);
-                        self.breg.print_reg()
                     }
                     0x6 => {
                         // println!("Instrução OR");
@@ -175,7 +169,6 @@ impl Cpu<'_> {
                         let rs2 = self.breg.get_reg(self.instruction.rs2);
                         let rd = rs1 | rs2;
                         self.breg.set_reg(self.instruction.rd, rd);
-                        self.breg.print_reg();
                     }
                     0x7 => {
                         // println!("Instrução AND");
@@ -183,7 +176,6 @@ impl Cpu<'_> {
                         let rs2 = self.breg.get_reg(self.instruction.rs2);
                         let rd = rs1 & rs2;
                         self.breg.set_reg(self.instruction.rd, rd);
-                        self.breg.print_reg();
                     }
                     _ => {
                         println!("Instrução não implementada");
@@ -194,12 +186,12 @@ impl Cpu<'_> {
                 // println!("Instrução do tipo I");
                 match self.instruction.funct3 {
                     0x0 => {
-                        // println!("Instrução ADDI");
+                        println!("Instrução ADDI");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
                         let imm_i = self.instruction.imm_i;
                         let rd = rs1 + imm_i;
+                        println!("valor de rd: {}", rd as u32);
                         self.breg.set_reg(self.instruction.rd, rd);
-                        self.breg.print_reg();
                     }
                     0x1 => {
                         // println!("Instrução SLLI");
@@ -207,7 +199,7 @@ impl Cpu<'_> {
                         let imm_i = self.instruction.imm_i;
                         let rd = rs1 << imm_i;
                         self.breg.set_reg(self.instruction.rd, rd);
-                        self.breg.print_reg();
+                        
                     }
                     0x2 => {
                         // println!("Instrução SLTI");
@@ -215,7 +207,6 @@ impl Cpu<'_> {
                         let imm_i = self.instruction.imm_i;
                         let rd = if rs1 < imm_i { 1 } else { 0 };
                         self.breg.set_reg(self.instruction.rd, rd);
-                        self.breg.print_reg();
                     }
                     0x3 => {
                         // println!("Instrução SLTIU");
@@ -223,7 +214,6 @@ impl Cpu<'_> {
                         let imm_i = self.instruction.imm_i as u32;
                         let rd = if rs1 < imm_i { 1 } else { 0 };
                         self.breg.set_reg(self.instruction.rd, rd as i32);
-                        self.breg.print_reg();
                     }
                     0x4 => {
                         // println!("Instrução XORI");
@@ -231,7 +221,6 @@ impl Cpu<'_> {
                         let imm_i = self.instruction.imm_i;
                         let rd = rs1 ^ imm_i;
                         self.breg.set_reg(self.instruction.rd, rd);
-                        self.breg.print_reg();
                     }
                     0x5 => {
                         // println!("Instrução SRLI");
@@ -239,7 +228,6 @@ impl Cpu<'_> {
                         let imm_i = self.instruction.imm_i;
                         let rd = rs1 >> imm_i;
                         self.breg.set_reg(self.instruction.rd, rd);
-                        self.breg.print_reg();
                     }
 
                     0x6 => {
@@ -248,7 +236,7 @@ impl Cpu<'_> {
                         let imm_i = self.instruction.imm_i;
                         let rd = rs1 | imm_i;
                         self.breg.set_reg(self.instruction.rd, rd);
-                        self.breg.print_reg();
+                        
                     }
                     0x7 => {
                         // println!("Instrução ANDI");
@@ -256,7 +244,6 @@ impl Cpu<'_> {
                         let imm_i = self.instruction.imm_i;
                         let rd = rs1 & imm_i;
                         self.breg.set_reg(self.instruction.rd, rd);
-                        self.breg.print_reg();
                     }
                     _ => {
                         println!("Instrução não implementada");
@@ -274,7 +261,6 @@ impl Cpu<'_> {
                         let value = self.memory.read_data_word(address as usize);
                         let rd = value as i8 as i32;
                         self.breg.set_reg(self.instruction.rd, rd);
-                        self.breg.print_reg();
                     }
                     0x1 => {
                         // println!("Instrução LH");
@@ -284,7 +270,6 @@ impl Cpu<'_> {
                         let value = self.memory.read_data_word(address as usize);
                         let rd = value as i16 as i32;
                         self.breg.set_reg(self.instruction.rd, rd);
-                        self.breg.print_reg();
                     }
                     0x2 => {
                         // println!("Instrução LW");
@@ -294,7 +279,6 @@ impl Cpu<'_> {
                         let value = self.memory.read_data_word(address as usize);
                         let rd = value as i32;
                         self.breg.set_reg(self.instruction.rd, rd);
-                        self.breg.print_reg();
                     }
                     0x4 => {
                         // println!("Instrução LBU");
@@ -304,7 +288,6 @@ impl Cpu<'_> {
                         let value = self.memory.read_data_word(address as usize);
                         let rd = value as u8 as u32;
                         self.breg.set_reg(self.instruction.rd, rd as i32);
-                        self.breg.print_reg();
                     }
                     0x5 => {
                         // println!("Instrução LHU");
@@ -314,7 +297,6 @@ impl Cpu<'_> {
                         let value = self.memory.read_data_word(address as usize);
                         let rd = value as u16 as u32;
                         self.breg.set_reg(self.instruction.rd, rd as i32);
-                        self.breg.print_reg();
                     }
                     _ => {
                         println!("Instrução não implementada");
@@ -331,7 +313,6 @@ impl Cpu<'_> {
                         let imm_s = self.instruction.imm_s;
                         let address = rs1 + imm_s;
                         self.memory.write_data_word(address as u32, rs2 as u32);
-                        self.memory.print_memory();
                     }
                     0x1 => {
                         // println!("Instrução SH");
@@ -340,7 +321,6 @@ impl Cpu<'_> {
                         let imm_s = self.instruction.imm_s;
                         let address = rs1 + imm_s;
                         self.memory.write_data_word(address as u32, rs2 as u32);
-                        self.memory.print_memory();
                     }
                     0x2 => {
                         // println!("Instrução SW");
@@ -349,7 +329,6 @@ impl Cpu<'_> {
                         let imm_s = self.instruction.imm_s;
                         let address = rs1 + imm_s;
                         self.memory.write_data_word(address as u32, rs2 as u32);
-                        self.memory.print_memory();
                     }
                     _ => {
                         println!("Instrução não implementada");
@@ -409,16 +388,16 @@ impl Cpu<'_> {
                     }
                 }
             }
-            //faltando tipu U e tipo J
+            //tipu U e J
             0x17 => {
-                // auipc
-                let imm_u = (self.instruction.imm_u as i32) << 12;
+                println!("Instrução AUIPC");
+                let imm_u = (self.instruction.imm_u) << 12;
                 let rd = self.instruction.rd;
                 self.breg.set_reg(rd, imm_u + self.pc as i32);
             }
             0x37 => {
                 // lui 
-                let imm_u = (self.instruction.imm_u as i32) << 12;
+                let imm_u = (self.instruction.imm_u) << 12;
                 let rd = self.instruction.rd;
                 self.breg.set_reg(rd, imm_u);
             }
@@ -437,6 +416,69 @@ impl Cpu<'_> {
                 self.breg.set_reg(rd, self.pc as i32 + 4);
                 self.pc = (rs1 + imm_i) as u32;
             }
+            //Instruções de sistema
+            0x73 => {
+                // println!("Instrução do tipo I");
+                match self.instruction.funct3 {
+                    0x0 => {
+                        println!("Instrução ECALL");
+                        match self.breg.get_reg(17) {
+                            1 => {
+                                println!("Print inteiro");
+                                println!("{}", self.breg.get_reg(10));
+                            }
+                            4 => {
+                                println!("Print string");
+                                let mut address = self.breg.get_reg(10) as usize;
+                                let mut value = self.memory.read_data_word(address);
+                                while value != 0 {
+                                    print!("{}", value as u8 as char);
+                                    address += 1;
+                                    value = self.memory.read_data_word(address);
+                                }
+                            }
+                            10 => {
+                                println!("Fim do programa");
+                                process::exit(0);
+                            }
+                            64 => {
+                                println!("Print String");
+                                // Write to a filedescriptor from a buffer
+                                let mut address = self.breg.get_reg(10) as usize;
+                                println!("address: {}", address);
+                                let mut value = self.memory.read_data_word(address);
+                                println!("value: {}", value);
+                                let mut char = (value & 0xFF) as u8 as char;
+                                while char != '\0' {
+                                    print!("{}", char);
+                                    char = (value & 0xFF00) as u8 as char;
+                                    print!("{}", char);
+                                    char = (value & 0xFF0000) as u8 as char;
+                                    print!("{}", char);
+                                    char = (value & 0xFF000000) as u8 as char;
+                                    print!("{}", char);
+                                    address += 1;
+                                    value = self.memory.read_data_word(address);
+                                    char = (value & 0xFF) as u8 as char;
+                                }
+
+                            }
+                            93 => {
+                                process::exit(self.breg.get_reg(10) as i32);
+                            }
+                            _ => {
+                                println!("Instrução não implementada");
+                            }
+
+                        }
+                        
+                    }
+                    _ => {
+                        println!("Instrução não implementada");
+                    }
+                }
+            }
+            
             _ => {
                 println!("Instrução não implementada");
             }
@@ -603,13 +645,19 @@ fn main() -> io::Result<()> {
     cpu.memory.print_memory();
 
     //fetch -> vamos começar com o PC = 0
-    cpu.fetch();
-    //decode
-    cpu.decode(cpu.inst);
-    // mostrando a instrução decodificada
-    cpu.print_instruction();
+    while cpu.pc < cpu.memory.text_segment.len() as u32 {
+        cpu.fetch();
+        cpu.decode(cpu.inst);
+        cpu.print_instruction();
+        cpu.execute();
+    }
+    // cpu.fetch();
+    // //decode
+    // cpu.decode(cpu.inst);
+    // // mostrando a instrução decodificada
+    // cpu.print_instruction();
 
-    cpu.execute();
+    // cpu.execute();
 
     // cpu.decode(cpu.fetch());
 
