@@ -67,7 +67,6 @@ fn main() -> io::Result<()> {
     //memória de texto e de dados carregada
     cpu.memory.print_memory();
 
-    //fetch -> vamos começar com o PC = 0
     while cpu.pc < cpu.memory.text_segment.len() as u32 {
         cpu.fetch();
         cpu.decode(cpu.inst);
@@ -75,15 +74,6 @@ fn main() -> io::Result<()> {
         cpu.execute();
         cpu.pc += 1;
     }
-    // cpu.fetch();
-    // //decode
-    // cpu.decode(cpu.inst);
-    // // mostrando a instrução decodificada
-    // cpu.print_instruction();
-
-    // cpu.execute();
-
-    // cpu.decode(cpu.fetch());
 
     Ok(())
 }

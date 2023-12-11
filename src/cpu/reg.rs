@@ -22,10 +22,8 @@ impl Breg {
         }
     }
     pub fn print_reg(&self) {
-        for (i, &word) in self.reg.iter().enumerate() {
-            if word != 0 {
-                println!("{:x}: {:x}", i, word);
-            }
+        for i in 0..32 {
+            println!("x{}: {}", i, self.reg[i]);
         }
     }
 }
