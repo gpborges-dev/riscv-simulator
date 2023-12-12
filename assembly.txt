@@ -1,5 +1,12 @@
-.data 
-double: .dword 99
-word: .word 88
+.data
+helloworld: .ascii "Hello World!\n"
 .text
-add x0, x0, x0
+inicio:
+beq x0, x0, pula
+addi x0, x0, 0
+addi x0, x0, 0
+addi x0, x0, 0
+addi x0, x0, 0
+pula:
+bne x0, x0, inicio
+jal x1, inicio

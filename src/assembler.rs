@@ -74,6 +74,35 @@ fn is_reg(reg : &str) -> bool {
     }
 }
 
+fn read_escapes(input: &Vec<u8>) -> Vec<u8> {
+    let mut output = Vec::new();
+
+    let mut iter = input.iter().copied();
+
+    while let Some(byte) = iter.next() {
+        if byte == b'\\' {
+            if let Some(escaped) = iter.next() {
+                match escaped {
+                    b'n' => output.push(b'\n'),
+                    b't' => output.push(b'\t'),
+                    b'r' => output.push(b'\r'),
+                    b'0' => output.push(b'\0'),
+                    _ => {
+                        output.push(b'\\');
+                        output.push(escaped);
+                    }
+                }
+            } else {
+                output.push(b'\\');
+            }
+        } else {
+            output.push(byte);
+        }
+    }
+
+    output
+}
+
 fn r_type(mnemonic : &str, args : &Vec<&str>) -> String {
     if args.len() != 3 || !is_reg(&args[0]) || !is_reg(&args[1]) || !is_reg(&args[2]) {
         panic!{"Arguments {:?} invalid for {mnemonic}", args}
@@ -528,8 +557,8 @@ fn sub_labels(data : &mut Vec<&str>, text : &mut Vec<&str>) -> (HashMap<String, 
         }
         // println!("{current_offset}");
     }
-    println!("{:?}", data_hash);
-    println!("{:?}", text_hash);
+    // println!("{:?}", data_hash);
+    // println!("{:?}", text_hash);
     (data_hash, text_hash)
 }
 
@@ -580,10 +609,11 @@ fn translator(data: &Vec<&str>, text : &Vec<&str>, data_hash : &HashMap<String, 
     for d in data {
         let element : Vec<&str> = d.splitn(2, " ").collect();
         let etype = element[0];
-        let content = &element[1].trim_matches('"');
+        let content = element[1].trim_matches('"');
 
         if etype == ".string" || etype == ".asciiz" || etype == ".ascii" {
-            let bytes = content.as_bytes();
+            let mut bytes : Vec<u8> = content.bytes().collect();
+            bytes = read_escapes(&bytes);
             for b in bytes {
                 databinaries += &format!("{:0>8b}", b);
             }
@@ -608,9 +638,10 @@ fn translator(data: &Vec<&str>, text : &Vec<&str>, data_hash : &HashMap<String, 
         }
         formatedatabin += &bit.to_string();
     }
-    formatedatabin += &"0".repeat(databinaries.len() % 32);
+    formatedatabin += &"0".repeat(if databinaries.len() % 32 == 0 {0} else {32 - databinaries.len() % 32});
+    formatedatabin += if data.len() > 0 {"\n\n"} else {""};
 
-    format!("{}\n\n{}", formatedatabin, textbinaries).trim_end_matches("\n").to_string()
+    format!("{}{}", formatedatabin, textbinaries).trim_end_matches("\n").to_string()
 }
 
 pub fn assemble(path: &str) {
