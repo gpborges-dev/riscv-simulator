@@ -185,8 +185,11 @@ impl Cpu<'_> {
                     0x0 => {
                         println!("Instrução ADDI");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
-                        let imm_i = self.instruction.imm_i;
-                        println!("{}", imm_i >> 31);
+                        let mut imm_i = self.instruction.imm_i;
+                        if(imm_i >> 11) == 1 {
+                            imm_i = ((imm_i & 0x800) - (imm_i & 0x7FF)) * (-1);
+                        }
+                        println!("{}", imm_i);
                         let rd = rs1 + imm_i;
                         println!("valor de rd: {}", rd as u32);
                         self.breg.set_reg(self.instruction.rd, rd);
@@ -194,7 +197,10 @@ impl Cpu<'_> {
                     0x1 => {
                         // println!("Instrução SLLI");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
-                        let imm_i = self.instruction.imm_i;
+                        let mut imm_i = self.instruction.imm_i;
+                        if(imm_i >> 11) == 1 {
+                            imm_i = ((imm_i & 0x800) - (imm_i & 0x7FF)) * (-1);
+                        }
                         let rd = rs1 << imm_i;
                         self.breg.set_reg(self.instruction.rd, rd);
                         
@@ -202,7 +208,10 @@ impl Cpu<'_> {
                     0x2 => {
                         // println!("Instrução SLTI");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
-                        let imm_i = self.instruction.imm_i;
+                        let mut imm_i = self.instruction.imm_i;
+                        if(imm_i >> 11) == 1 {
+                            imm_i = ((imm_i & 0x800) - (imm_i & 0x7FF)) * (-1);
+                        }
                         let rd = if rs1 < imm_i { 1 } else { 0 };
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
@@ -216,14 +225,20 @@ impl Cpu<'_> {
                     0x4 => {
                         // println!("Instrução XORI");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
-                        let imm_i = self.instruction.imm_i;
+                        let mut imm_i = self.instruction.imm_i;
+                        if(imm_i >> 11) == 1 {
+                            imm_i = ((imm_i & 0x800) - (imm_i & 0x7FF)) * (-1);
+                        }
                         let rd = rs1 ^ imm_i;
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
                     0x5 => {
                         // println!("Instrução SRLI");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
-                        let imm_i = self.instruction.imm_i;
+                        let mut imm_i = self.instruction.imm_i;
+                        if(imm_i >> 11) == 1 {
+                            imm_i = ((imm_i & 0x800) - (imm_i & 0x7FF)) * (-1);
+                        }
                         let rd = rs1 >> imm_i;
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
@@ -231,7 +246,10 @@ impl Cpu<'_> {
                     0x6 => {
                         // println!("Instrução ORI");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
-                        let imm_i = self.instruction.imm_i;
+                        let mut imm_i = self.instruction.imm_i;
+                        if(imm_i >> 11) == 1 {
+                            imm_i = ((imm_i & 0x800) - (imm_i & 0x7FF)) * (-1);
+                        }
                         let rd = rs1 | imm_i;
                         self.breg.set_reg(self.instruction.rd, rd);
                         
@@ -239,7 +257,10 @@ impl Cpu<'_> {
                     0x7 => {
                         // println!("Instrução ANDI");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
-                        let imm_i = self.instruction.imm_i;
+                        let mut imm_i = self.instruction.imm_i;
+                        if(imm_i >> 11) == 1 {
+                            imm_i = ((imm_i & 0x800) - (imm_i & 0x7FF)) * (-1);
+                        }
                         let rd = rs1 & imm_i;
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
@@ -449,23 +470,42 @@ impl Cpu<'_> {
                             64 => {
                                 println!("Print String");
                                 // Write to a filedescriptor from a buffer
-                                let mut address = self.breg.get_reg(10) as usize;
+                                let mut address = self.breg.get_reg(11) as usize;
+                                address = address/4 - 2048;
+                                let mut size = self.breg.get_reg(12) as usize;
+                                println!("size: {}", size);
                                 println!("address: {}", address);
                                 let mut value = self.memory.read_data_word(address);
                                 println!("value: {}", value);
-                                let mut char = (value & 0xFF) as u8 as char;
-                                while char != '\0' {
-                                    print!("{}", char);
-                                    char = (value & 0xFF00) as u8 as char;
-                                    print!("{}", char);
-                                    char = (value & 0xFF0000) as u8 as char;
-                                    print!("{}", char);
-                                    char = (value & 0xFF000000) as u8 as char;
-                                    print!("{}", char);
+                                
+                                while(size > 0){
+                                    print!("{}", (value & 0xFF) as u8 as char);
+                                    size -= 1;
+                                    if(size <= 0){
+                                        break;
+                                    }
+                                    print!("{}", ((value >> 8) & 0xFF) as u8 as char);
+                                    size -= 1;
+                                    if(size <= 0){
+                                        break;
+                                    }
+                                    print!("{}", ((value >> 16) & 0xFF) as u8 as char);
+                                    size -= 1;
+                                    if(size <= 0){
+                                        break;
+                                    }
+                                    print!("{}", ((value >> 24) & 0x000000FF) as u8 as char);
+                                    size -= 1;
+                                    if(size <= 0){
+                                        break;
+                                    }
                                     address += 1;
                                     value = self.memory.read_data_word(address);
-                                    char = (value & 0xFF) as u8 as char;
-                                }
+                                }    
+                    
+
+                                    
+                                
 
                             }
                             93 => {

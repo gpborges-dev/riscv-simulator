@@ -52,14 +52,14 @@ impl Memory {
     }
     pub fn print_text_segment(&mut self) {
         for (k, &word) in self.text_segment.iter().enumerate() {
-            if (word != 0) {
+            if word != 0 {
                 println!("{:x}: {:x}", k, word);
             }
         }
     }
     pub fn print_data_segment(&mut self) {
         for (j, &word) in self.data_segment.iter().enumerate() {
-            if (word != 0) {
+            if word != 0 {
                 println!("{:x}: {:x}", j, word);
             }
         }

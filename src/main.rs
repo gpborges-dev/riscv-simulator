@@ -13,8 +13,8 @@ fn main() -> io::Result<()> {
     // let args : Vec<String> = std::env::args().collect();
     // assembler::assemble(&args[1]);
 
-    let file = File::open("hello_text")?;
-    let file2 = File::open("hello_data")?;
+    let file = File::open("hello2_text.txt")?;
+    let file2 = File::open("hello2_data.txt")?;
     let reader = io::BufReader::new(file);
     let reader2 = io::BufReader::new(file2);
     //instanciação da memória e dos registradores
@@ -67,7 +67,7 @@ fn main() -> io::Result<()> {
     //memória de texto e de dados carregada
     cpu.memory.print_memory();
 
-    while cpu.pc < cpu.memory.text_segment.len() as u32 {
+    while cpu.pc < 0xffc as u32 {
         cpu.fetch();
         cpu.decode(cpu.inst);
         cpu.print_instruction();
