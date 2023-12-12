@@ -1,5 +1,5 @@
 use core::panic;
-use std::{collections::HashMap, ops::RangeBounds};
+use std::collections::HashMap;
 
 const DATA_ADDR : u32 = 0x10010000;
 const TEXT_ADDR : u32 = 0x00400000;
@@ -72,6 +72,22 @@ fn get_u32(num : &str) -> u32 {
         }
     } else {
         if let Ok(n) = num.parse::<u32>() {
+            n
+        } else {
+            panic!("Invalid decimal: {num}")
+        }
+    }
+}
+
+fn get_u64(num : &str) -> u64 {
+    if num.to_lowercase().starts_with("0x") {
+        if let Ok(n) = u64::from_str_radix(&num[2..], 16) {
+            n
+        } else {
+            panic!("Invalid hex: {num}")
+        }
+    } else {
+        if let Ok(n) = num.parse::<u64>() {
             n
         } else {
             panic!("Invalid decimal: {num}")
@@ -352,7 +368,7 @@ fn is_label(label : &str) -> bool {
 }
 
 fn get_data_size(data : &mut &str) -> u32 {
-    let line : Vec<&str> = data.split(" ").collect();
+    let line : Vec<&str> = data.splitn(2," ").collect();
     if line.len() == 2 {
         if line[0] == ".string" || line[0] == ".asciiz" {
             let mut string: &str = line[1];
@@ -453,12 +469,20 @@ fn get_data_size(data : &mut &str) -> u32 {
             }
         } else {
             if let Ok(_) = data.parse::<u8>() {
+                let new_data = format!(".byte {}", *data);
+                *data = Box::leak(new_data.into_boxed_str());
                 1
             } else if let Ok(_) = data.parse::<u16>() {
+                let new_data = format!(".half {}", *data);
+                *data = Box::leak(new_data.into_boxed_str());
                 2
             } else if let Ok(_) = data.parse::<u32>() {
+                let new_data = format!(".word {}", *data);
+                *data = Box::leak(new_data.into_boxed_str());
                 4
             } else if let Ok(_) = data.parse::<u64>() {
+                let new_data = format!("dword. {}", *data);
+                *data = Box::leak(new_data.into_boxed_str());
                 8
             } else {
                 panic!("{data} is a invalid type or is out of bounds")
@@ -467,8 +491,6 @@ fn get_data_size(data : &mut &str) -> u32 {
     } else {
         panic!("{data} is from a invalid type")
     }
-
-    
 }
 
 fn sub_labels(data : &mut Vec<&str>, text : &mut Vec<&str>) -> (HashMap<String, u32>, HashMap<String, u32>) {
@@ -547,7 +569,7 @@ fn translator(data: &Vec<&str>, text : &Vec<&str>, data_hash : &HashMap<String, 
     let u_mnemonics = ["lui", "auipc"];
     let j_mnemonics = ["jal"];
 
-    let mut binaries : String = String::new();
+    let mut textbinaries : String = String::new();
     for (index, instruction) in text.iter().enumerate() {
         let inst_addr: u32 = TEXT_ADDR + 4 * index as u32;
         let delimiter = instruction.find(' ');
@@ -561,23 +583,54 @@ fn translator(data: &Vec<&str>, text : &Vec<&str>, data_hash : &HashMap<String, 
         }
 
         if r_mnemonics.iter().any(|m| m == &mnemonic) {
-            binaries.push_str(&r_type(&mnemonic, &args));
+            textbinaries.push_str(&r_type(&mnemonic, &args));
         } else if i_mnemonics.iter().any(|m| m == &mnemonic) {
-            binaries.push_str(&i_type(&mnemonic, &args));
+            textbinaries.push_str(&i_type(&mnemonic, &args));
         } else if s_mnemonics.iter().any(|m| m == &mnemonic) {
-            binaries.push_str(&s_type(&mnemonic, &args));
+            textbinaries.push_str(&s_type(&mnemonic, &args));
         } else if b_mnemonics.iter().any(|m| m == &mnemonic) {
-            binaries.push_str(&b_type(&mnemonic, &args, &text_hash, &inst_addr));
+            textbinaries.push_str(&b_type(&mnemonic, &args, &text_hash, &inst_addr));
         } else if u_mnemonics.iter().any(|m| m == &mnemonic) {
-            binaries.push_str(&u_type(&mnemonic, &args));
+            textbinaries.push_str(&u_type(&mnemonic, &args));
         } else if j_mnemonics.iter().any(|m| m == &mnemonic) {
-            binaries.push_str(&j_type(&mnemonic, &args, &text_hash, &inst_addr));
+            textbinaries.push_str(&j_type(&mnemonic, &args, &text_hash, &inst_addr));
         } else {
             panic!("Invalid mnemonic {mnemonic}")
         }
     }
-    println!("{binaries}");
-    binaries
+    println!("{textbinaries}");
+
+    // @ verificar se o double está funcionando corretamente
+    // @ inverter os bytes da memória
+    // @ separar a cada 32 bits
+    let mut databinaries: String = String::new();
+    for d in data {
+        let element : Vec<&str> = d.splitn(2, " ").collect();
+        let etype = element[0];
+        let content = &element[1].trim_matches('"');
+
+        if etype == ".string" || etype == ".asciiz" || etype == ".ascii" {
+            let bytes = content.as_bytes();
+            for b in bytes {
+                databinaries += &format!("{:0>8b}", b);
+            }
+            if etype != ".ascii" {
+                databinaries += "00000000";
+            }
+        } else if etype == ".byte" {
+            databinaries += &format!("{:0>8b}", get_u32(content));
+        } else if etype == ".half" {
+            databinaries += &format!("{:0>16b}", get_u32(content));
+        } else if etype == ".word" {
+            databinaries += &format!("{:0>32b}", get_u32(content));
+        } else if etype == ".dword" {
+            databinaries += &format!("{:0>64b}", get_u64(content));
+        }
+    }
+
+    println!("{}", databinaries);
+
+    format!("{}\n{}", databinaries, textbinaries)
 }
 
 pub fn assemble(path: &str) {
@@ -592,3 +645,17 @@ pub fn assemble(path: &str) {
     println!("Text:\n{:?}", text);
     translator(&data, &text, &data_hash, &text_hash);
 }
+//     l         l         e         H
+// (01101100)(01101100)(01100101)(01001000)
+//     r         o         W         o
+// (01110010)(01101111)(01010111)(01101111)
+//                         d         l         
+// (00000000)(00000000)(01100100)(01101100)
+
+
+//     H         e         l         l
+// (01001000)(01100101)(01101100)(01101100)
+//     o         W         o         r
+// (01101111)(01010111)(01101111)(01110010)
+//     l         d
+// (01101100)(01100100)(00000000)
