@@ -29,6 +29,10 @@ add x0, x0, x0
 pula1:
 jal x5, pula2
 exit:
+auipc x10, 64528
+addi x10, x10, -96
+addi x17, x0, 4
+ecall
 addi x17, x0, 10
 ecall
 pula2:
