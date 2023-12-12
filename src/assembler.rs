@@ -3,7 +3,6 @@ use std::{collections::HashMap, io::Write};
 
 const DATA_ADDR : u32 = 0x00002000; // max 4096 bytes
 const TEXT_ADDR : u32 = 0x00000000; // max 4092 bytes
-// @ implementar linhas de código
 
 fn u32str_to_bin(dec : &str) -> String {
     if let Ok(d) = dec.parse::<u32>() {
@@ -13,7 +12,6 @@ fn u32str_to_bin(dec : &str) -> String {
     }
 }
 
-// @ verificar o erro exato
 fn get_i32(num : &str) -> i32 {
     if num.to_lowercase().starts_with("0x") {
         if let Ok(n) = i32::from_str_radix(&num[2..], 16) {
@@ -604,7 +602,6 @@ fn translator(data: &Vec<&str>, text : &Vec<&str>, data_hash : &HashMap<String, 
         }
     }
 
-    // @ fazer o \n ser apenas um caractere
     let mut databinaries: String = String::new();
     for d in data {
         let element : Vec<&str> = d.splitn(2, " ").collect();
