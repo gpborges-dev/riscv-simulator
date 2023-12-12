@@ -22,8 +22,11 @@ impl Breg {
         }
     }
     pub fn print_reg(&self) {
+        println!("=====================================================================");
+        println!("Banco de registradores: ");
         for i in 0..32 {
-            println!("x{}: {}", i, self.reg[i]);
+            println!("registrador x{}: {}", i, self.reg[i]);
         }
+        println!("=====================================================================");
     }
 }

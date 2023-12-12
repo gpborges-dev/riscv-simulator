@@ -13,7 +13,7 @@ fn main() -> io::Result<()> {
     // let args : Vec<String> = std::env::args().collect();
     // assembler::assemble(&args[1]);
 
-    let file = File::open("hello2_text.txt")?;
+    let file = File::open("teste_aritmetico_text.txt")?;
     let file2 = File::open("hello2_data.txt")?;
     let reader = io::BufReader::new(file);
     let reader2 = io::BufReader::new(file2);
@@ -70,9 +70,12 @@ fn main() -> io::Result<()> {
     while cpu.pc < 0xffc as u32 {
         cpu.fetch();
         cpu.decode(cpu.inst);
-        cpu.print_instruction();
+        // cpu.print_instruction();
+        // cpu.breg.print_reg();
         cpu.execute();
-        cpu.pc += 1;
+        if(cpu.instruction.opcode != 0x67 && cpu.instruction.opcode != 0x63 && cpu.instruction.opcode != 0x6f){
+            cpu.pc += 1;
+        }
     }
 
     Ok(())

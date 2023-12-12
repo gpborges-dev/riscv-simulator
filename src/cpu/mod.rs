@@ -40,13 +40,12 @@ impl Cpu<'_> {
         }
     }
     pub fn fetch(&mut self) -> () {
-        println!("=============================================");
-        println!(
-            "retorno do fetch: {:x}",
-            self.memory.read_text_word(self.pc as usize)
-        );
+        // println!(
+        //     "retorno do fetch: {:x}",
+        //     self.memory.read_text_word(self.pc as usize)
+        // );
         self.inst = self.memory.read_text_word(self.pc as usize);
-        println!("self.inst: {:032b}", self.inst as u32);
+        // println!("self.inst: {:032b}", self.inst as u32);
     }
     pub fn decode(&mut self, instruction: u32) -> () {
         let opcode = instruction & 0x7F;
@@ -60,12 +59,14 @@ impl Cpu<'_> {
         let imm_b = (((instruction >> 31) & 0x1) << 12
             | ((instruction >> 7) & 0x1) << 11
             | ((instruction >> 25) & 0x3F) << 5
-            | ((instruction >> 8) & 0xF)) as i32;
-        let imm_u = ((instruction >> 12) & 0xFFFFF) as i32;
+            | ((instruction >> 8) & 0xF) << 1) as i32;
+    
+        let imm_u = ((instruction & 0xFFFFF000) as i32);
+
         let imm_j = (((instruction >> 31) & 0x1) << 20
-            | ((instruction >> 21) & 0x3FF) << 1
-            | ((instruction >> 20) & 0x1) << 11
-            | ((instruction >> 12) & 0xFF)) as i32;
+            | (instruction >> 21) & 0x3FF
+            | (instruction >> 20) & 0x1
+            | (instruction >> 12) & 0xFF) as i32;
         //carregando o campo instruction com a instrução decodificada
         self.instruction.opcode = opcode as u8;
         self.instruction.rd = rd as u8;
@@ -79,20 +80,20 @@ impl Cpu<'_> {
         self.instruction.imm_u = imm_u;
         self.instruction.imm_j = imm_j;
     }
-    pub fn print_instruction(&self) {
-        println!("=============================================");
-        println!("opcode: {:b}", self.instruction.opcode as u32);
-        println!("rd: {:b}", self.instruction.rd as u32);
-        println!("funct3: {:b}", self.instruction.funct3 as u32);
-        println!("rs1: {:b}", self.instruction.rs1 as u32);
-        println!("rs2: {:b}", self.instruction.rs2 as u32);
-        println!("funct7: {:b}", self.instruction.funct7);
-        println!("imm_i: {:b}", self.instruction.imm_i as u32);
-        println!("imm_s: {:b}", self.instruction.imm_s as u32);
-        println!("imm_b: {:b}", self.instruction.imm_b as u32);
-        println!("imm_u: {:b}", self.instruction.imm_u as u32);
-        println!("imm_j: {:b}", self.instruction.imm_j as u32);
-    }
+    // pub fn print_instruction(&self) {
+    //     println!("=============================================");
+    //     println!("opcode: {:b}", self.instruction.opcode as u32);
+    //     println!("rd: {:b}", self.instruction.rd as u32);
+    //     println!("funct3: {:b}", self.instruction.funct3 as u32);
+    //     println!("rs1: {:b}", self.instruction.rs1 as u32);
+    //     println!("rs2: {:b}", self.instruction.rs2 as u32);
+    //     println!("funct7: {:b}", self.instruction.funct7);
+    //     println!("imm_i: {:b}", self.instruction.imm_i as u32);
+    //     println!("imm_s: {:b}", self.instruction.imm_s as u32);
+    //     println!("imm_b: {:b}", self.instruction.imm_b as u32);
+    //     println!("imm_u: {:b}", self.instruction.imm_u as u32);
+    //     println!("imm_j: {:x}", self.instruction.imm_j as u32);
+    // }
     pub fn execute(&mut self) {
         match self.instruction.opcode {
             0x33 => {
@@ -100,14 +101,14 @@ impl Cpu<'_> {
                 match self.instruction.funct3 {
                     0x0 => match self.instruction.funct7 {
                         0x0 => {
-                            // println!("Instrução ADD");
+                            println!("Instrução ADD");
                             let rs1 = self.breg.get_reg(self.instruction.rs1);
                             let rs2 = self.breg.get_reg(self.instruction.rs2);
                             let rd = rs1 + rs2;
                             self.breg.set_reg(self.instruction.rd, rd);
                         }
                         0x1 => {
-                            // println!("Instrução MUL");
+                            println!("Instrução MUL");
                             //
                             let rs1 = self.breg.get_reg(self.instruction.rs1);
                             let rs2 = self.breg.get_reg(self.instruction.rs2);
@@ -115,7 +116,7 @@ impl Cpu<'_> {
                             self.breg.set_reg(self.instruction.rd, rd);
                         }
                         0x20 => {
-                            // println!("Instrução SUB");
+                            println!("Instrução SUB");
                             let rs1 = self.breg.get_reg(self.instruction.rs1);
                             let rs2 = self.breg.get_reg(self.instruction.rs2);
                             let rd = rs1 - rs2;
@@ -126,49 +127,49 @@ impl Cpu<'_> {
                         }
                     },
                     0x1 => {
-                        // println!("Instrução SLL");
+                        println!("Instrução SLL");
                         let rs1 = self.breg.get_reg(self.instruction.rs1);
                         let rs2 = self.breg.get_reg(self.instruction.rs2);
                         let rd = rs1 << rs2;
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
                     0x2 => {
-                        // println!("Instrução SLT");
+                        println!("Instrução SLT");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
                         let rs2 = self.breg.get_reg(self.instruction.rs2) as i32;
                         let rd = if rs1 < rs2 { 1 } else { 0 };
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
                     0x3 => {
-                        // println!("Instrução SLTU");
+                        println!("Instrução SLTU");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as u32;
                         let rs2 = self.breg.get_reg(self.instruction.rs2) as u32;
                         let rd = if rs1 < rs2 { 1 } else { 0 };
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
                     0x4 => {
-                        // println!("Instrução XOR");
+                        println!("Instrução XOR");
                         let rs1 = self.breg.get_reg(self.instruction.rs1);
                         let rs2 = self.breg.get_reg(self.instruction.rs2);
                         let rd = rs1 ^ rs2;
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
                     0x5 => {
-                        // println!("Instrução SRL");
+                        println!("Instrução SRL");
                         let rs1 = self.breg.get_reg(self.instruction.rs1);
                         let rs2 = self.breg.get_reg(self.instruction.rs2);
                         let rd = rs1 >> rs2;
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
                     0x6 => {
-                        // println!("Instrução OR");
+                        println!("Instrução OR");
                         let rs1 = self.breg.get_reg(self.instruction.rs1);
                         let rs2 = self.breg.get_reg(self.instruction.rs2);
                         let rd = rs1 | rs2;
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
                     0x7 => {
-                        // println!("Instrução AND");
+                        println!("Instrução AND");
                         let rs1 = self.breg.get_reg(self.instruction.rs1);
                         let rs2 = self.breg.get_reg(self.instruction.rs2);
                         let rd = rs1 & rs2;
@@ -189,13 +190,13 @@ impl Cpu<'_> {
                         if(imm_i >> 11) == 1 {
                             imm_i = ((imm_i & 0x800) - (imm_i & 0x7FF)) * (-1);
                         }
-                        println!("{}", imm_i);
+                        // println!("{}", imm_i);
                         let rd = rs1 + imm_i;
-                        println!("valor de rd: {}", rd as u32);
+                        // println!("valor de rd: {}", rd as u32);
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
                     0x1 => {
-                        // println!("Instrução SLLI");
+                        println!("Instrução SLLI");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
                         let mut imm_i = self.instruction.imm_i;
                         if(imm_i >> 11) == 1 {
@@ -206,7 +207,7 @@ impl Cpu<'_> {
                         
                     }
                     0x2 => {
-                        // println!("Instrução SLTI");
+                        println!("Instrução SLTI");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
                         let mut imm_i = self.instruction.imm_i;
                         if(imm_i >> 11) == 1 {
@@ -216,14 +217,14 @@ impl Cpu<'_> {
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
                     0x3 => {
-                        // println!("Instrução SLTIU");
+                        println!("Instrução SLTIU");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as u32;
                         let imm_i = self.instruction.imm_i as u32;
                         let rd = if rs1 < imm_i { 1 } else { 0 };
                         self.breg.set_reg(self.instruction.rd, rd as i32);
                     }
                     0x4 => {
-                        // println!("Instrução XORI");
+                        println!("Instrução XORI");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
                         let mut imm_i = self.instruction.imm_i;
                         if(imm_i >> 11) == 1 {
@@ -233,7 +234,7 @@ impl Cpu<'_> {
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
                     0x5 => {
-                        // println!("Instrução SRLI");
+                        println!("Instrução SRLI");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
                         let mut imm_i = self.instruction.imm_i;
                         if(imm_i >> 11) == 1 {
@@ -244,7 +245,7 @@ impl Cpu<'_> {
                     }
 
                     0x6 => {
-                        // println!("Instrução ORI");
+                        println!("Instrução ORI");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
                         let mut imm_i = self.instruction.imm_i;
                         if(imm_i >> 11) == 1 {
@@ -255,7 +256,7 @@ impl Cpu<'_> {
                         
                     }
                     0x7 => {
-                        // println!("Instrução ANDI");
+                        println!("Instrução ANDI");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
                         let mut imm_i = self.instruction.imm_i;
                         if(imm_i >> 11) == 1 {
@@ -270,37 +271,50 @@ impl Cpu<'_> {
                 }
             }
             0x3 => {
-                // println!("Instrução do tipo S");
+                // println!("Instrução do tipo I");
                 match self.instruction.funct3 {
                     0x0 => {
-                        // println!("Instrução LB");
+                        println!("Instrução LB");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
-                        let imm_i = self.instruction.imm_i;
-                        let address = rs1 + imm_i;
+                        let mut imm_i = self.instruction.imm_i;
+                        
+                        if(imm_i >> 11) == 1 {
+                            imm_i = ((imm_i & 0x800) - (imm_i & 0x7FF)) * (-1);
+                        }
+                        let mut address = rs1 + imm_i;
+                        address = address/4 - 2048;
+
                         let value = self.memory.read_data_word(address as usize);
                         let rd = value as i8 as i32;
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
                     0x1 => {
-                        // println!("Instrução LH");
+                        println!("Instrução LH");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
-                        let imm_i = self.instruction.imm_i;
-                        let address = rs1 + imm_i;
+                        let mut imm_i = self.instruction.imm_i;
+                        if(imm_i >> 11) == 1 {
+                            imm_i = ((imm_i & 0x800) - (imm_i & 0x7FF)) * (-1);
+                        }
+                        let mut address = rs1 + imm_i;
                         let value = self.memory.read_data_word(address as usize);
                         let rd = value as i16 as i32;
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
                     0x2 => {
-                        // println!("Instrução LW");
+                        println!("Instrução LW");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
-                        let imm_i = self.instruction.imm_i;
-                        let address = rs1 + imm_i;
+                        let mut imm_i = self.instruction.imm_i;
+                        if(imm_i >> 11) == 1 {
+                            imm_i = ((imm_i & 0x800) - (imm_i & 0x7FF)) * (-1);
+                        }
+                        let mut address = rs1 + imm_i;
+                        address = address/4 - 2048;
                         let value = self.memory.read_data_word(address as usize);
                         let rd = value as i32;
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
                     0x4 => {
-                        // println!("Instrução LBU");
+                        println!("Instrução LBU");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as u32;
                         let imm_i = self.instruction.imm_i as u32;
                         let address = rs1 + imm_i;
@@ -309,10 +323,11 @@ impl Cpu<'_> {
                         self.breg.set_reg(self.instruction.rd, rd as i32);
                     }
                     0x5 => {
-                        // println!("Instrução LHU");
+                        println!("Instrução LHU");
                         let rs1 = self.breg.get_reg(self.instruction.rs1);
                         let imm_i = self.instruction.imm_i;
-                        let address = rs1 + imm_i;
+                        let mut address: i32 = rs1 + imm_i;
+                        address = address/4 - 2048;
                         let value = self.memory.read_data_word(address as usize);
                         let rd = value as u16 as u32;
                         self.breg.set_reg(self.instruction.rd, rd as i32);
@@ -326,27 +341,39 @@ impl Cpu<'_> {
                 // println!("Instrução do tipo S");
                 match self.instruction.funct3 {
                     0x0 => {
-                        // println!("Instrução SB");
+                        println!("Instrução SB");
                         let rs1 = self.breg.get_reg(self.instruction.rs1);
                         let rs2 = self.breg.get_reg(self.instruction.rs2) as u8;
-                        let imm_s = self.instruction.imm_s;
-                        let address = rs1 + imm_s;
+                        let mut imm_s = self.instruction.imm_s;
+                        if(imm_s >> 11) == 1 {
+                            imm_s = ((imm_s & 0x800) - (imm_s & 0x7FF)) * (-1);
+                        }
+                        let mut address = rs1 + imm_s;
+                        address = address/4 - 2048;
                         self.memory.write_data_word(address as u32, rs2 as u32);
                     }
                     0x1 => {
-                        // println!("Instrução SH");
+                        println!("Instrução SH");
                         let rs1 = self.breg.get_reg(self.instruction.rs1);
                         let rs2 = self.breg.get_reg(self.instruction.rs2) as u16;
-                        let imm_s = self.instruction.imm_s;
-                        let address = rs1 + imm_s;
+                        let mut imm_s = self.instruction.imm_s;
+                        if(imm_s >> 11) == 1 {
+                            imm_s = ((imm_s & 0x800) - (imm_s & 0x7FF)) * (-1);
+                        }
+                        let mut address = rs1 + imm_s;
+                        address = address/4 - 2048;
                         self.memory.write_data_word(address as u32, rs2 as u32);
                     }
                     0x2 => {
-                        // println!("Instrução SW");
+                        println!("Instrução SW");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
                         let rs2 = self.breg.get_reg(self.instruction.rs2) as i32;
-                        let imm_s = self.instruction.imm_s;
-                        let address = rs1 + imm_s;
+                        let mut imm_s = self.instruction.imm_s;
+                        if(imm_s >> 11) == 1 {
+                            imm_s = ((imm_s & 0x800) - (imm_s & 0x7FF)) * (-1);
+                        }
+                        let mut address = rs1 + imm_s;
+                        address = address/4 - 2048;
                         self.memory.write_data_word(address as u32, rs2 as u32);
                     }
                     _ => {
@@ -358,48 +385,76 @@ impl Cpu<'_> {
                 // println!("Instrução do tipo B");
                 match self.instruction.funct3 {
                     0x0 => {
-                        // println!("Instrução BEQ");
+                        println!("Instrução BEQ");
                         let rs1 = self.breg.get_reg(self.instruction.rs1);
                         let rs2 = self.breg.get_reg(self.instruction.rs2);
-                        let imm_b = self.instruction.imm_b;
+                        let mut imm_b = self.instruction.imm_b;
+                        if(imm_b >> 11) == 1 {
+                            imm_b = ((imm_b & 0x800) - (imm_b & 0x7FF)) * (-1);
+                        }
+                        // println!("rs1: {}", rs1);
+                        // println!("rs2: {}", rs2);
+                        // println!("imm_b: {}", imm_b);
                         if rs1 == rs2 {
-                            self.pc = (self.pc as i32 + imm_b) as u32;
+                            self.pc = (self.pc as i32 + (imm_b / 4)) as u32;
+                            // println!("pc: {}", self.pc)
+                        }else{
+                            self.pc += 1;
                         }
                     }
                     0x1 => {
-                        // println!("Instrução BNE");
+                        println!("Instrução BNE");
                         let rs1 = self.breg.get_reg(self.instruction.rs1);
                         let rs2 = self.breg.get_reg(self.instruction.rs2);
-                        let imm_b = self.instruction.imm_b;
+                        let mut imm_b = self.instruction.imm_b;
+                        if(imm_b >> 11) == 1 {
+                            imm_b = ((imm_b & 0x800) - (imm_b & 0x7FF)) * (-1);
+                        }
                         if rs1 != rs2 {
-                            self.pc = (self.pc as i32 + imm_b) as u32;
+                            self.pc = (self.pc as i32 + (imm_b / 4)) as u32;
+                            // println!("pc: {}", self.pc)
+                        }else{
+                            self.pc += 1;
+                            // println!("pc: {}", self.pc)
                         }
                     }
                     0x4 => {
-                        // println!("Instrução BLT");
+                        println!("Instrução BLT");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
                         let rs2 = self.breg.get_reg(self.instruction.rs2) as i32;
-                        let imm_b = self.instruction.imm_b;
+                        let mut imm_b = self.instruction.imm_b;
+                        if(imm_b >> 11) == 1 {
+                            imm_b = ((imm_b & 0x800) - (imm_b & 0x7FF)) * (-1);
+                        }
                         if rs1 < rs2 {
-                            self.pc = (self.pc as i32 + imm_b) as u32;
+                            self.pc = (self.pc as i32 + (imm_b / 4)) as u32;
+                        }else{
+                            self.pc += 1;
                         }
                     }
                     0x5 => {
-                        // println!("Instrução BGE");
+                        println!("Instrução BGE");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
                         let rs2 = self.breg.get_reg(self.instruction.rs2) as i32;
-                        let imm_b = self.instruction.imm_b;
+                        let mut imm_b = self.instruction.imm_b;
+                        if(imm_b >> 11) == 1 {
+                            imm_b = ((imm_b & 0x800) - (imm_b & 0x7FF)) * (-1);
+                        }
                         if rs1 >= rs2 {
-                            self.pc = (self.pc as i32 + imm_b) as u32;
+                            self.pc = (self.pc as i32 + (imm_b / 4)) as u32;
+                        }else{
+                            self.pc += 1;
                         }
                     }
                     0x6 => {
-                        // println!("Instrução BLTU");
+                        println!("Instrução BLTU");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as u32;
                         let rs2 = self.breg.get_reg(self.instruction.rs2) as u32;
                         let imm_b = self.instruction.imm_b;
                         if rs1 < rs2 {
-                            self.pc = (self.pc as i32 + imm_b) as u32;
+                            self.pc = (self.pc as i32 + (imm_b / 4)) as u32;
+                        }else{
+                            self.pc += 1;
                         }
                     }
                     _ => {
@@ -410,27 +465,36 @@ impl Cpu<'_> {
             //tipu U e J
             0x17 => {
                 println!("Instrução AUIPC");
-                let imm_u = (self.instruction.imm_u << 12) as u32;
+                let mut imm_u = (self.instruction.imm_u << 12) as i32;
+                if(imm_u >> 19) == 1 {
+                    imm_u = ((imm_u & 0x800) - (imm_u & 0x7FF)) * (-1);
+                }
                 let mut rd = self.instruction.rd;
-                
-                self.breg.set_reg(rd, (imm_u + (self.pc * 4)) as i32);
-                println!("valor de rd: {:08x}", self.breg.get_reg(rd));
+                self.breg.set_reg(rd, (imm_u + (self.pc * 4) as i32) as i32);
+                // println!("valor de rd: {:08x}", self.breg.get_reg(rd));
             }
             0x37 => {
-                // lui 
+                println!("Instrução LUI");
                 let imm_u = (self.instruction.imm_u) << 12;
                 let rd = self.instruction.rd;
                 self.breg.set_reg(rd, imm_u);
             }
             0x6F => {
                 // jal
-                let imm_j = self.instruction.imm_j;
+                println!("Instrução JAL");
+                let mut imm_j = self.instruction.imm_j;
+                if(imm_j >> 19) == 1 {
+                    imm_j = ((imm_j & 0x800) - (imm_j & 0x7FF)) * (-1);
+                }
+                // println!("imediato jal: {}", imm_j);
                 let rd = self.instruction.rd;
-                self.breg.set_reg(rd, self.pc as i32 + 4);
-                self.pc = (self.pc as i32 + imm_j) as u32;
+                self.breg.set_reg(rd, (self.pc * 4) as i32);
+                self.pc = (self.pc as i32 + (imm_j / 4)) as u32;
+                // println!("pc: {}", self.pc)
             }
             0x67 => {
                 // jalr
+                println!("Instrução JALR");
                 let imm_i = self.instruction.imm_i;
                 let rs1 = self.breg.get_reg(self.instruction.rs1);
                 let rd = self.instruction.rd;
@@ -449,7 +513,7 @@ impl Cpu<'_> {
                                 println!("{}", self.breg.get_reg(10));
                             }
                             4 => {
-                                println!("Print string");
+                                // println!("Print string");
                                 let mut address = self.breg.get_reg(10) as usize;
                                 let mut value = self.memory.read_data_word(address);
                                 while value != 0 {
@@ -463,7 +527,7 @@ impl Cpu<'_> {
                                 process::exit(0);
                             }
                             11 => {
-                                println!("Print char");
+                                // println!("Print char");
                                 let value = self.breg.get_reg(10);
                                 print!("{}", value as u8 as char);
                             }
