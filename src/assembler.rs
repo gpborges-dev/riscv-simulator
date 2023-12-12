@@ -1,46 +1,13 @@
 use core::panic;
-use std::collections::HashMap;
+use std::{collections::HashMap, io::Write};
 
-const DATA_ADDR : u32 = 0x10010000;
-const TEXT_ADDR : u32 = 0x00400000;
-// @ implementar o tamanho máximo para dados e texto para evitar overflows na conversão de u32 para i32
+const DATA_ADDR : u32 = 0x00002000; // max 4096 bytes
+const TEXT_ADDR : u32 = 0x00000000; // max 4092 bytes
 // @ implementar linhas de código
-// @ carregar na memória o texto e o código
-
-struct SymbolTable {
-    data : HashMap<String, u32>,
-    text : HashMap<String, u32>
-}
-
-struct Content<'a> {
-    data : Vec<&'a str>,
-    text: Vec<&'a str>
-}
-
-struct Memory {
-    data : Vec<u32>,
-    text : Vec<u32>
-}
 
 fn u32str_to_bin(dec : &str) -> String {
     if let Ok(d) = dec.parse::<u32>() {
         format!("{:b}", d)
-    } else {
-        String::from("")
-    }
-}
-
-fn i32str_to_bin(dec : &str) -> String {
-    if let Ok(d) = dec.parse::<i32>() {
-        format!("{:b}", d)
-    } else {
-        String::from("")
-    }
-}
-
-fn hex_to_bin(hex : &str) -> String {
-    if let Ok(h) = u32::from_str_radix(hex, 16) {
-        format!("{:b}", h)
     } else {
         String::from("")
     }
@@ -315,7 +282,7 @@ fn j_type(mnemonic : &str, args : &Vec<&str>, text_hash : &HashMap<String, u32>,
     }
     let opcode: String = String::from("1101111");
     let rd : String = format!("{:0>5}", u32str_to_bin(&args[0][1..]));
-    let imm : String = format!("{:0>32b}", offset); // na hora de pegar os bits ele desloca um bit
+    let imm : String = format!("{:0>32b}", offset);
     format!("{}{}{}{}{}{}\n", &imm.chars().nth(11).unwrap(), &imm[21..=30], &imm.chars().nth(20).unwrap(), &imm[12..=19], rd, opcode)
 }
 
@@ -520,7 +487,9 @@ fn sub_labels(data : &mut Vec<&str>, text : &mut Vec<&str>) -> (HashMap<String, 
             if text_hash.contains_key(&id) {
                 panic!("label {id} has already been defined");
             }
-            // verificar se o endereço não é grande demais
+            if index * 4 > 4092 {
+                panic!("Text memory overflow")
+            }
             text_hash.insert(id, TEXT_ADDR + index*4);
         }
     }
@@ -554,10 +523,13 @@ fn sub_labels(data : &mut Vec<&str>, text : &mut Vec<&str>) -> (HashMap<String, 
             data_hash.insert(id, DATA_ADDR + current_offset);
         }
         current_offset += get_data_size(&mut line);
+        if current_offset > 4096 {
+            panic!("Data memory overflow")
+        }
         // println!("{current_offset}");
     }
     println!("{:?}", data_hash);
-    // println!("{:?}", text_hash);
+    println!("{:?}", text_hash);
     (data_hash, text_hash)
 }
 
@@ -578,6 +550,8 @@ fn translator(data: &Vec<&str>, text : &Vec<&str>, data_hash : &HashMap<String, 
         if let Some(d) = delimiter {
             mnemonic = &instruction[..d].trim();
             args = instruction[d+1..].split(',').map(|arg| arg.trim()).collect();
+        } else if instruction.trim() == "ecall" {
+            mnemonic = "ecall";
         } else {
             panic!("Instruction {instruction} not valid")
         }
@@ -594,15 +568,14 @@ fn translator(data: &Vec<&str>, text : &Vec<&str>, data_hash : &HashMap<String, 
             textbinaries.push_str(&u_type(&mnemonic, &args));
         } else if j_mnemonics.iter().any(|m| m == &mnemonic) {
             textbinaries.push_str(&j_type(&mnemonic, &args, &text_hash, &inst_addr));
+        } else if mnemonic == "ecall" {
+            textbinaries.push_str("00000000000000000000000001110011\n");
         } else {
             panic!("Invalid mnemonic {mnemonic}")
         }
     }
-    println!("{textbinaries}");
 
-    // @ verificar se o double está funcionando corretamente
-    // @ inverter os bytes da memória
-    // @ separar a cada 32 bits
+    // @ fazer o \n ser apenas um caractere
     let mut databinaries: String = String::new();
     for d in data {
         let element : Vec<&str> = d.splitn(2, " ").collect();
@@ -628,34 +601,28 @@ fn translator(data: &Vec<&str>, text : &Vec<&str>, data_hash : &HashMap<String, 
         }
     }
 
-    println!("{}", databinaries);
+    let mut formatedatabin: String = String::new();
+    for (index, bit) in databinaries.chars().enumerate() {
+        if index % 32 == 0 && index > 0 {
+            formatedatabin += "\n";
+        }
+        formatedatabin += &bit.to_string();
+    }
+    formatedatabin += &"0".repeat(databinaries.len() % 32);
 
-    format!("{}\n{}", databinaries, textbinaries)
+    format!("{}\n\n{}", formatedatabin, textbinaries).trim_end_matches("\n").to_string()
 }
 
 pub fn assemble(path: &str) {
     let content: String = std::fs::read_to_string(path).expect("Couldn't read file");
     let formated_content: String = format_code(&content);
-    println!("Content: \n{content}");
+    // println!("Content: \n{content}");
     let (mut data, mut text) = split_segments(&formated_content);
     // println!("Data:\n{:?}", data);
     // println!("Text:\n{:?}", text);
     let (data_hash, text_hash) = sub_labels(&mut data, &mut text);
-    println!("Data:\n{:?}", data);
-    println!("Text:\n{:?}", text);
-    translator(&data, &text, &data_hash, &text_hash);
+    // println!("Data:\n{:?}", data);
+    // println!("Text:\n{:?}", text);
+    let mut file = std::fs::File::create("bin.txt").expect("Couldn't create file");
+    file.write(translator(&data, &text, &data_hash, &text_hash).as_bytes()).expect("Couldn't write to file");
 }
-//     l         l         e         H
-// (01101100)(01101100)(01100101)(01001000)
-//     r         o         W         o
-// (01110010)(01101111)(01010111)(01101111)
-//                         d         l         
-// (00000000)(00000000)(01100100)(01101100)
-
-
-//     H         e         l         l
-// (01001000)(01100101)(01101100)(01101100)
-//     o         W         o         r
-// (01101111)(01010111)(01101111)(01110010)
-//     l         d
-// (01101100)(01100100)(00000000)

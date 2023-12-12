@@ -1,12 +1,5 @@
-inicio:
-jal x1, main
-beq x1, x2, main
-
-
-
-auipc x2, 30
-jalr x1, x2, 0x89
-main:
-lui x2, -70
-jal x2, inicio
-bne x1, x2, inicio
+.data 
+double: .dword 99
+word: .word 88
+.text
+add x0, x0, x0
