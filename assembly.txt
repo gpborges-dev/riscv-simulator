@@ -1,12 +1,13 @@
-inicio:
-jal x1, main
-beq x1, x2, main
+.text
+addi x10, x0, 1
+auipc x11, 2
+addi x11, x11, -4
+addi x12, x0, 13
+addi x17, x0, 64
+ecall
+addi x10, x0, 0
+addi x17, x0, 93
+ecall
+.data
+helloworld: .ascii "Hello World!\n"
 
-
-
-auipc x2, 30
-jalr x1, x2, 0x89
-main:
-lui x2, -70
-jal x2, inicio
-bne x1, x2, inicio

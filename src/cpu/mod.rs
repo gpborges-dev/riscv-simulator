@@ -61,7 +61,7 @@ impl Cpu<'_> {
             | ((instruction >> 25) & 0x3F) << 5
             | ((instruction >> 8) & 0xF) << 1) as i32;
     
-        let imm_u = ((instruction & 0xFFFFF000) as i32);
+        let imm_u = ((instruction >> 12) & 0xFFFFF) as i32;
 
         let imm_j = (((instruction >> 31) & 0x1) << 20
             | (instruction >> 21) & 0x3FF
@@ -296,6 +296,7 @@ impl Cpu<'_> {
                             imm_i = ((imm_i & 0x800) - (imm_i & 0x7FF)) * (-1);
                         }
                         let mut address = rs1 + imm_i;
+                        address = address/4 - 2048;
                         let value = self.memory.read_data_word(address as usize);
                         let rd = value as i16 as i32;
                         self.breg.set_reg(self.instruction.rd, rd);
@@ -309,6 +310,7 @@ impl Cpu<'_> {
                         }
                         let mut address = rs1 + imm_i;
                         address = address/4 - 2048;
+                        println!("address: {:x}", address);
                         let value = self.memory.read_data_word(address as usize);
                         let rd = value as i32;
                         self.breg.set_reg(self.instruction.rd, rd);
@@ -465,13 +467,11 @@ impl Cpu<'_> {
             //tipu U e J
             0x17 => {
                 println!("Instrução AUIPC");
-                let mut imm_u = (self.instruction.imm_u << 12) as i32;
-                if(imm_u >> 19) == 1 {
-                    imm_u = ((imm_u & 0x800) - (imm_u & 0x7FF)) * (-1);
-                }
+                let imm_u = (self.instruction.imm_u << 12) as u32;
                 let mut rd = self.instruction.rd;
-                self.breg.set_reg(rd, (imm_u + (self.pc * 4) as i32) as i32);
-                // println!("valor de rd: {:08x}", self.breg.get_reg(rd));
+                
+                self.breg.set_reg(rd, (imm_u + (self.pc * 4)) as i32);
+                println!("valor de rd: {:08x}", self.breg.get_reg(rd));
             }
             0x37 => {
                 println!("Instrução LUI");
@@ -543,12 +543,7 @@ impl Cpu<'_> {
                                 println!("value: {}", value);
                                 
                                 while(size > 0){
-                                    print!("{}", (value & 0xFF) as u8 as char);
-                                    size -= 1;
-                                    if(size <= 0){
-                                        break;
-                                    }
-                                    print!("{}", ((value >> 8) & 0xFF) as u8 as char);
+                                    print!("{}", ((value >> 24) & 0x000000FF) as u8 as char);
                                     size -= 1;
                                     if(size <= 0){
                                         break;
@@ -558,7 +553,12 @@ impl Cpu<'_> {
                                     if(size <= 0){
                                         break;
                                     }
-                                    print!("{}", ((value >> 24) & 0x000000FF) as u8 as char);
+                                    print!("{}", ((value >> 8) & 0xFF) as u8 as char);
+                                    size -= 1;
+                                    if(size <= 0){
+                                        break;
+                                    }
+                                    print!("{}", (value & 0xFF) as u8 as char);
                                     size -= 1;
                                     if(size <= 0){
                                         break;

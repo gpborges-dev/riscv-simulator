@@ -6,7 +6,7 @@ pub struct Memory {
 impl Memory {
     pub fn new() -> Self {
         Memory {
-            text_segment: vec![0; 0x1000],
+            text_segment: vec![0; 0xffc],
             data_segment: vec![0; 0x1000],
         }
     }

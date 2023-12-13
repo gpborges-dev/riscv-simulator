@@ -1,20 +1,24 @@
 use std::fs::File;
 use std::io::{self, BufRead};
 
+
 use crate::cpu::Cpu;
 use crate::cpu::RiscvInstruction;
 use crate::cpu::Breg;
 use crate::cpu::Memory;
 
+
 mod assembler;
 mod cpu;
 
 fn main() -> io::Result<()> {
-    // let args : Vec<String> = std::env::args().collect();
-    // assembler::assemble(&args[1]);
+    let args : Vec<String> = std::env::args().collect();
+    assembler::assemble(&args[1]);
+    println!("Arquivo binário gerado com sucesso!");
+    
 
     let file = File::open("teste_aritmetico_text.txt")?;
-    let file2 = File::open("hello2_data.txt")?;
+    let file2 = File::open("bin_data.txt")?;
     let reader = io::BufReader::new(file);
     let reader2 = io::BufReader::new(file2);
     //instanciação da memória e dos registradores
@@ -68,10 +72,11 @@ fn main() -> io::Result<()> {
     cpu.memory.print_memory();
 
     while cpu.pc < 0xffc as u32 {
+        
         cpu.fetch();
         cpu.decode(cpu.inst);
         // cpu.print_instruction();
-        // cpu.breg.print_reg();
+        cpu.breg.print_reg();
         cpu.execute();
         if(cpu.instruction.opcode != 0x67 && cpu.instruction.opcode != 0x63 && cpu.instruction.opcode != 0x6f){
             cpu.pc += 1;

@@ -25,7 +25,7 @@ impl Breg {
         println!("=====================================================================");
         println!("Banco de registradores: ");
         for i in 0..32 {
-            println!("registrador x{}: {}", i, self.reg[i]);
+            println!("registrador x{}: {:x}", i, self.reg[i]);
         }
         println!("=====================================================================");
     }
