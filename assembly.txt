@@ -3,9 +3,9 @@ helloworld: .ascii "Hello World!\n"
 num1: .word 5
 num2: .word 2
 .text
-auipc x5, 64528
+auipc x5, 2
 lw x5, 16(x5)
-auipc x6, 64528
+auipc x6, 2
 lw x6, 12(x6)
 sub x7, x5, x6
 sll x7, x5, x6
@@ -29,7 +29,7 @@ add x0, x0, x0
 pula1:
 jal x5, pula2
 exit:
-auipc x10, 64528
+auipc x10, 2
 addi x10, x10, -96
 addi x17, x0, 4
 ecall
@@ -39,8 +39,8 @@ pula2:
 beq x5, x6, exit
 addi x5, x0, 10
 addi x6, x0, -8
-auipc x7, 64528
+auipc x7, 2
 sw x5, -100(x7)
-auipc x7, 64528
+auipc x7, 2
 sw x6, -104(x7)
 bne x5, x6, exit
