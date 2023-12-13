@@ -560,7 +560,7 @@ fn sub_labels(data : &mut Vec<&str>, text : &mut Vec<&str>) -> (HashMap<String, 
     (data_hash, text_hash)
 }
 
-fn translator(data: &Vec<&str>, text : &Vec<&str>, data_hash : &HashMap<String, u32>, text_hash : &HashMap<String, u32>) -> String {
+fn translator(data: &Vec<&str>, text : &Vec<&str>, data_hash : &HashMap<String, u32>, text_hash : &HashMap<String, u32>) -> (String, String) {
     let r_mnemonics = ["add", "sub", "sll", "slt", "sltu", "xor", "srl", "sra", "or", "and"];
     let i_mnemonics = ["addi", "addi", "slti", "sltiu", "xori", "ori", "andi", "slli", "srli", "srai", "jalr", "lb", "lh", "lw", "lbu", "lhu"];
     let s_mnemonics = ["sb", "sw", "sh"];
@@ -636,9 +636,8 @@ fn translator(data: &Vec<&str>, text : &Vec<&str>, data_hash : &HashMap<String, 
         formatedatabin += &bit.to_string();
     }
     formatedatabin += &"0".repeat(if databinaries.len() % 32 == 0 {0} else {32 - databinaries.len() % 32});
-    formatedatabin += if data.len() > 0 {"\n\n"} else {""};
 
-    format!("{}{}", formatedatabin, textbinaries).trim_end_matches("\n").to_string()
+    (formatedatabin, textbinaries.trim_end_matches("\n").to_string())
 }
 
 pub fn assemble(path: &str) {
@@ -651,6 +650,9 @@ pub fn assemble(path: &str) {
     let (data_hash, text_hash) = sub_labels(&mut data, &mut text);
     // println!("Data:\n{:?}", data);
     // println!("Text:\n{:?}", text);
-    let mut file = std::fs::File::create("bin.txt").expect("Couldn't create file");
-    file.write(translator(&data, &text, &data_hash, &text_hash).as_bytes()).expect("Couldn't write to file");
+    let (databinaries, textbinaries) = translator(&data, &text, &data_hash, &text_hash);
+    let mut file = std::fs::File::create("bin_data.txt").expect("Couldn't create file");
+    file.write(databinaries.as_bytes()).expect("Couldn't write to file");
+    let mut file = std::fs::File::create("bin_text.txt").expect("Couldn't create file");
+    file.write(textbinaries.as_bytes()).expect("Couldn't write to file");
 }
