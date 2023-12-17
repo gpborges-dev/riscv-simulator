@@ -1,9 +1,11 @@
-// #Introdução
-// ##Simulador de um processador RISC-V
-// Para executar o simulador, basta usar o comando cargo run <nome do arquivo assembly> no terminal.
-// O arquivo assembly deve estar na pasta raiz do projeto.
-// Os arquivos binários gerados pelo montador estarão na pasta raiz do projeto.
-// O arquivo bin_data.txt contém os dados do programa e o arquivo bin_text.txt contém as instruções do programa.
+//! Introdução
+//! ===============================
+//! Montador e simulador de processador RISC-V
+//! ===============================           
+//! Para executar o simulador, basta usar o comando cargo run nome-do-arquivo-assembly no terminal.
+//! O arquivo assembly deve estar na pasta raiz do projeto.
+//! Os arquivos binários gerados pelo montador estarão na pasta raiz do projeto.
+//! O arquivo bin_data.txt contém os dados do programa e o arquivo bin_text.txt contém as instruções do programa.
 
 
 
