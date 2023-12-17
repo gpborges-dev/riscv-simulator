@@ -1,9 +1,13 @@
+//! Este módulo respresenta a CPU do processador Risc-v, contém as definições dos registradores e da memória, além das funções de fetch, decode e execute.
+
+
 mod mem;
 mod reg;
 pub use mem::Memory;
 pub use reg::Breg;
 pub use std::process;
 
+// Definição da estrutura de uma instrução Risc-v
 pub struct RiscvInstruction {
     pub opcode: u8,
     pub rd: u8,
@@ -17,7 +21,7 @@ pub struct RiscvInstruction {
     pub imm_u: i32,
     pub imm_j: i32,
 }
-
+// Definição da estrutura da CPU, que contém referências para a memória, registradores e instrução, além do contador de programa.
 pub struct Cpu<'a> {
     pub pc: u32,
     pub breg: &'a mut Breg,
@@ -25,7 +29,9 @@ pub struct Cpu<'a> {
     pub instruction: &'a mut RiscvInstruction,
     pub inst: u32,
 }
+// Definição da implementação da CPU
 impl Cpu<'_> {
+    // A função new() instancia a CPU com referências para a memória, registradores e instrução.
     pub fn new<'a>(
         breg: &'a mut Breg,
         memory: &'a mut Memory,
@@ -39,14 +45,13 @@ impl Cpu<'_> {
             inst: 0,
         }
     }
+    // A função fetch() lê uma instrução da memória de texto.
     pub fn fetch(&mut self) -> () {
-        // println!(
-        //     "retorno do fetch: {:x}",
-        //     self.memory.read_text_word(self.pc as usize)
-        // );
+        
         self.inst = self.memory.read_text_word(self.pc as usize);
-        // println!("self.inst: {:032b}", self.inst as u32);
+        
     }
+    // A função decode() decodifica uma instrução e atribui os valores aos campos da estrutura RiscvInstruction.
     pub fn decode(&mut self, instruction: u32) -> () {
         let opcode = instruction & 0x7F;
         let rd = (instruction >> 7) & 0x1F;
@@ -80,27 +85,15 @@ impl Cpu<'_> {
         self.instruction.imm_u = imm_u;
         self.instruction.imm_j = imm_j;
     }
-    // pub fn print_instruction(&self) {
-    //     println!("=============================================");
-    //     println!("opcode: {:b}", self.instruction.opcode as u32);
-    //     println!("rd: {:b}", self.instruction.rd as u32);
-    //     println!("funct3: {:b}", self.instruction.funct3 as u32);
-    //     println!("rs1: {:b}", self.instruction.rs1 as u32);
-    //     println!("rs2: {:b}", self.instruction.rs2 as u32);
-    //     println!("funct7: {:b}", self.instruction.funct7);
-    //     println!("imm_i: {:b}", self.instruction.imm_i as u32);
-    //     println!("imm_s: {:b}", self.instruction.imm_s as u32);
-    //     println!("imm_b: {:b}", self.instruction.imm_b as u32);
-    //     println!("imm_u: {:b}", self.instruction.imm_u as u32);
-    //     println!("imm_j: {:x}", self.instruction.imm_j as u32);
-    // }
+    // A função execute() executa uma instrução.
     pub fn execute(&mut self) {
         match self.instruction.opcode {
             0x33 => {
-                // println!("Instrução do tipo R");
+                // A instrução é do tipo R
                 match self.instruction.funct3 {
                     0x0 => match self.instruction.funct7 {
                         0x0 => {
+                            // O valor do campo funct7 é 0, então a instrução é ADD
                             println!("Instrução ADD");
                             let rs1 = self.breg.get_reg(self.instruction.rs1);
                             let rs2 = self.breg.get_reg(self.instruction.rs2);
@@ -109,13 +102,14 @@ impl Cpu<'_> {
                         }
                         0x1 => {
                             println!("Instrução MUL");
-                            //
+                            // O valor do campo funct7 é 0x1, então a instrução é MUL
                             let rs1 = self.breg.get_reg(self.instruction.rs1);
                             let rs2 = self.breg.get_reg(self.instruction.rs2);
                             let rd = rs1 * rs2;
                             self.breg.set_reg(self.instruction.rd, rd);
                         }
                         0x20 => {
+                            // O valor do campo funct7 é 0x20, então a instrução é SUB
                             println!("Instrução SUB");
                             let rs1 = self.breg.get_reg(self.instruction.rs1);
                             let rs2 = self.breg.get_reg(self.instruction.rs2);
@@ -127,6 +121,7 @@ impl Cpu<'_> {
                         }
                     },
                     0x1 => {
+                        // O valor do campo funct3 é 0x1, então a instrução é SLL
                         println!("Instrução SLL");
                         let rs1 = self.breg.get_reg(self.instruction.rs1);
                         let rs2 = self.breg.get_reg(self.instruction.rs2);
@@ -134,6 +129,7 @@ impl Cpu<'_> {
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
                     0x2 => {
+                        // O valor do campo funct3 é 0x2, então a instrução é SLT
                         println!("Instrução SLT");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
                         let rs2 = self.breg.get_reg(self.instruction.rs2) as i32;
@@ -141,6 +137,7 @@ impl Cpu<'_> {
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
                     0x3 => {
+                        // O valor do campo funct3 é 0x3, então a instrução é SLTU
                         println!("Instrução SLTU");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as u32;
                         let rs2 = self.breg.get_reg(self.instruction.rs2) as u32;
@@ -148,6 +145,7 @@ impl Cpu<'_> {
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
                     0x4 => {
+                        // O valor do campo funct3 é 0x4, então a instrução é XOR
                         println!("Instrução XOR");
                         let rs1 = self.breg.get_reg(self.instruction.rs1);
                         let rs2 = self.breg.get_reg(self.instruction.rs2);
@@ -155,6 +153,7 @@ impl Cpu<'_> {
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
                     0x5 => {
+                        // O valor do campo funct3 é 0x5, então a instrução é SRL
                         println!("Instrução SRL");
                         let rs1 = self.breg.get_reg(self.instruction.rs1);
                         let rs2 = self.breg.get_reg(self.instruction.rs2);
@@ -162,13 +161,15 @@ impl Cpu<'_> {
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
                     0x6 => {
+                        // O valor do campo funct3 é 0x6, então a instrução é OR
                         println!("Instrução OR");
                         let rs1 = self.breg.get_reg(self.instruction.rs1);
                         let rs2 = self.breg.get_reg(self.instruction.rs2);
                         let rd = rs1 | rs2;
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
-                    0x7 => {
+                    0x7 => {    
+                        // O valor do campo funct3 é 0x7, então a instrução é AND
                         println!("Instrução AND");
                         let rs1 = self.breg.get_reg(self.instruction.rs1);
                         let rs2 = self.breg.get_reg(self.instruction.rs2);
@@ -181,21 +182,23 @@ impl Cpu<'_> {
                 }
             }
             0x13 => {
-                // println!("Instrução do tipo I");
+                // A instrução é do tipo I
                 match self.instruction.funct3 {
                     0x0 => {
+                        // O valor do campo funct3 é 0x0, então a instrução é ADDI
                         println!("Instrução ADDI");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
                         let mut imm_i = self.instruction.imm_i;
                         if(imm_i >> 11) == 1 {
                             imm_i = ((imm_i & 0x800) - (imm_i & 0x7FF)) * (-1);
                         }
-                        // println!("{}", imm_i);
+                        
                         let rd = rs1 + imm_i;
-                        // println!("valor de rd: {}", rd as u32);
+                        
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
                     0x1 => {
+                        // O valor do campo funct3 é 0x1, então a instrução é SLLI
                         println!("Instrução SLLI");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
                         let mut imm_i = self.instruction.imm_i;
@@ -207,6 +210,7 @@ impl Cpu<'_> {
                         
                     }
                     0x2 => {
+                        // O valor do campo funct3 é 0x2, então a instrução é SLTI
                         println!("Instrução SLTI");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
                         let mut imm_i = self.instruction.imm_i;
@@ -217,6 +221,7 @@ impl Cpu<'_> {
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
                     0x3 => {
+                        // O valor do campo funct3 é 0x3, então a instrução é SLTIU
                         println!("Instrução SLTIU");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as u32;
                         let imm_i = self.instruction.imm_i as u32;
@@ -224,6 +229,7 @@ impl Cpu<'_> {
                         self.breg.set_reg(self.instruction.rd, rd as i32);
                     }
                     0x4 => {
+                        // O valor do campo funct3 é 0x4, então a instrução é XORI
                         println!("Instrução XORI");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
                         let mut imm_i = self.instruction.imm_i;
@@ -234,6 +240,7 @@ impl Cpu<'_> {
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
                     0x5 => {
+                        // O valor do campo funct3 é 0x5, então a instrução é SRLI ou SRAI
                         println!("Instrução SRLI");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
                         let mut imm_i = self.instruction.imm_i;
@@ -245,6 +252,7 @@ impl Cpu<'_> {
                     }
 
                     0x6 => {
+                        // O valor do campo funct3 é 0x6, então a instrução é ORI
                         println!("Instrução ORI");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
                         let mut imm_i = self.instruction.imm_i;
@@ -256,6 +264,7 @@ impl Cpu<'_> {
                         
                     }
                     0x7 => {
+                        // O valor do campo funct3 é 0x7, então a instrução é ANDI
                         println!("Instrução ANDI");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
                         let mut imm_i = self.instruction.imm_i;
@@ -271,9 +280,10 @@ impl Cpu<'_> {
                 }
             }
             0x3 => {
-                // println!("Instrução do tipo I");
+                // A instrução é do tipo I
                 match self.instruction.funct3 {
                     0x0 => {
+                        // O valor do campo funct3 é 0x0, então a instrução é LB
                         println!("Instrução LB");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
                         let mut imm_i = self.instruction.imm_i;
@@ -289,6 +299,7 @@ impl Cpu<'_> {
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
                     0x1 => {
+                        // O valor do campo funct3 é 0x1, então a instrução é LH
                         println!("Instrução LH");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
                         let mut imm_i = self.instruction.imm_i;
@@ -302,6 +313,7 @@ impl Cpu<'_> {
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
                     0x2 => {
+                        // O valor do campo funct3 é 0x2, então a instrução é LW
                         println!("Instrução LW");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
                         let mut imm_i = self.instruction.imm_i;
@@ -316,6 +328,7 @@ impl Cpu<'_> {
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
                     0x4 => {
+                        // O valor do campo funct3 é 0x4, então a instrução é LBU
                         println!("Instrução LBU");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as u32;
                         let imm_i = self.instruction.imm_i as u32;
@@ -325,6 +338,7 @@ impl Cpu<'_> {
                         self.breg.set_reg(self.instruction.rd, rd as i32);
                     }
                     0x5 => {
+                        // O valor do campo funct3 é 0x5, então a instrução é LHU
                         println!("Instrução LHU");
                         let rs1 = self.breg.get_reg(self.instruction.rs1);
                         let imm_i = self.instruction.imm_i;
@@ -340,9 +354,10 @@ impl Cpu<'_> {
                 }
             }
             0x23 => {
-                // println!("Instrução do tipo S");
+                // A instrução é do tipo S
                 match self.instruction.funct3 {
                     0x0 => {
+                        // O valor do campo funct3 é 0x0, então a instrução é SB
                         println!("Instrução SB");
                         let rs1 = self.breg.get_reg(self.instruction.rs1);
                         let rs2 = self.breg.get_reg(self.instruction.rs2) as u8;
@@ -355,6 +370,7 @@ impl Cpu<'_> {
                         self.memory.write_data_word(address as u32, rs2 as u32);
                     }
                     0x1 => {
+                        // O valor do campo funct3 é 0x1, então a instrução é SH
                         println!("Instrução SH");
                         let rs1 = self.breg.get_reg(self.instruction.rs1);
                         let rs2 = self.breg.get_reg(self.instruction.rs2) as u16;
@@ -367,6 +383,7 @@ impl Cpu<'_> {
                         self.memory.write_data_word(address as u32, rs2 as u32);
                     }
                     0x2 => {
+                        // O valor do campo funct3 é 0x2, então a instrução é SW
                         println!("Instrução SW");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
                         let rs2 = self.breg.get_reg(self.instruction.rs2) as i32;
@@ -384,9 +401,10 @@ impl Cpu<'_> {
                 }
             }
             0x63 => {
-                // println!("Instrução do tipo B");
+                // A instrução é do tipo B
                 match self.instruction.funct3 {
                     0x0 => {
+                        // O valor do campo funct3 é 0x0, então a instrução é BEQ
                         println!("Instrução BEQ");
                         let rs1 = self.breg.get_reg(self.instruction.rs1);
                         let rs2 = self.breg.get_reg(self.instruction.rs2);
@@ -394,17 +412,16 @@ impl Cpu<'_> {
                         if(imm_b >> 11) == 1 {
                             imm_b = ((imm_b & 0x800) - (imm_b & 0x7FF)) * (-1);
                         }
-                        // println!("rs1: {}", rs1);
-                        // println!("rs2: {}", rs2);
-                        // println!("imm_b: {}", imm_b);
+                    
                         if rs1 == rs2 {
                             self.pc = (self.pc as i32 + (imm_b / 4)) as u32;
-                            // println!("pc: {}", self.pc)
+                            
                         }else{
                             self.pc += 1;
                         }
                     }
                     0x1 => {
+                        // O valor do campo funct3 é 0x1, então a instrução é BNE
                         println!("Instrução BNE");
                         let rs1 = self.breg.get_reg(self.instruction.rs1);
                         let rs2 = self.breg.get_reg(self.instruction.rs2);
@@ -414,13 +431,14 @@ impl Cpu<'_> {
                         }
                         if rs1 != rs2 {
                             self.pc = (self.pc as i32 + (imm_b / 4)) as u32;
-                            // println!("pc: {}", self.pc)
+                            
                         }else{
                             self.pc += 1;
-                            // println!("pc: {}", self.pc)
+                            
                         }
                     }
                     0x4 => {
+                        // O valor do campo funct3 é 0x4, então a instrução é BLT
                         println!("Instrução BLT");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
                         let rs2 = self.breg.get_reg(self.instruction.rs2) as i32;
@@ -435,6 +453,7 @@ impl Cpu<'_> {
                         }
                     }
                     0x5 => {
+                        // O valor do campo funct3 é 0x5, então a instrução é BGE
                         println!("Instrução BGE");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as i32;
                         let rs2 = self.breg.get_reg(self.instruction.rs2) as i32;
@@ -449,6 +468,7 @@ impl Cpu<'_> {
                         }
                     }
                     0x6 => {
+                        // O valor do campo funct3 é 0x6, então a instrução é BLTU
                         println!("Instrução BLTU");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as u32;
                         let rs2 = self.breg.get_reg(self.instruction.rs2) as u32;
@@ -466,6 +486,7 @@ impl Cpu<'_> {
             }
             //tipu U e J
             0x17 => {
+                // O valor do opcode é 0x17, então a instrução é AUIPC
                 println!("Instrução AUIPC");
                 let imm_u = (self.instruction.imm_u << 12) as u32;
                 let mut rd = self.instruction.rd;
@@ -474,26 +495,27 @@ impl Cpu<'_> {
                 println!("valor de rd: {:08x}", self.breg.get_reg(rd));
             }
             0x37 => {
+                // O valor do opcode é 0x37, então a instrução é LUI
                 println!("Instrução LUI");
                 let imm_u = (self.instruction.imm_u) << 12;
                 let rd = self.instruction.rd;
                 self.breg.set_reg(rd, imm_u);
             }
             0x6F => {
-                // jal
+                // O valor do opcode é 0x6F, então a instrução é JAL
                 println!("Instrução JAL");
                 let mut imm_j = self.instruction.imm_j;
                 if(imm_j >> 19) == 1 {
                     imm_j = ((imm_j & 0x800) - (imm_j & 0x7FF)) * (-1);
                 }
-                // println!("imediato jal: {}", imm_j);
+                
                 let rd = self.instruction.rd;
                 self.breg.set_reg(rd, (self.pc * 4) as i32);
                 self.pc = (self.pc as i32 + (imm_j / 4)) as u32;
-                // println!("pc: {}", self.pc)
+                
             }
             0x67 => {
-                // jalr
+                // O valor do opcode é 0x67, então a instrução é JALR
                 println!("Instrução JALR");
                 let imm_i = self.instruction.imm_i;
                 let rs1 = self.breg.get_reg(self.instruction.rs1);
@@ -503,17 +525,18 @@ impl Cpu<'_> {
             }
             //Instruções de sistema
             0x73 => {
-                // println!("Instrução do tipo I");
+                // O valor do opcode é 0x73, então a instrução é SYSTEM
                 match self.instruction.funct3 {
                     0x0 => {
                         println!("Instrução ECALL");
                         match self.breg.get_reg(17) {
                             1 => {
+                                //ecall print inteiro
                                 println!("Print inteiro");
                                 println!("{}", self.breg.get_reg(10));
                             }
                             4 => {
-                                // println!("Print string");
+                                
                                 let mut address = self.breg.get_reg(10) as usize;
                                 let mut value = self.memory.read_data_word(address);
                                 while value != 0 {
@@ -527,13 +550,14 @@ impl Cpu<'_> {
                                 process::exit(0);
                             }
                             11 => {
-                                // println!("Print char");
+                                //ecall print char
                                 let value = self.breg.get_reg(10);
                                 print!("{}", value as u8 as char);
                             }
                             64 => {
-                                println!("Print String");
+                                //ecall de print string
                                 // Write to a filedescriptor from a buffer
+                                println!("Print String");
                                 let mut address = self.breg.get_reg(11) as usize;
                                 address = address/4 - 2048;
                                 let mut size = self.breg.get_reg(12) as usize;
