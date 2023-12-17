@@ -1,4 +1,4 @@
-//! Este módulo respresenta a CPU do processador Risc-v, contém as definições dos registradores e da memória, além das funções de fetch, decode e execute.
+//! Este módulo respresenta a CPU do processador Risc-v, onde são utilizados registradores e memória, além das funções de fetch, decode e execute.
 
 
 mod mem;
@@ -31,7 +31,7 @@ pub struct Cpu<'a> {
 }
 // Definição da implementação da CPU
 impl Cpu<'_> {
-    // A função new() instancia a CPU com referências para a memória, registradores e instrução.
+    /// A função new() instancia a CPU com referências para a memória, registradores e instrução.
     pub fn new<'a>(
         breg: &'a mut Breg,
         memory: &'a mut Memory,
@@ -45,13 +45,13 @@ impl Cpu<'_> {
             inst: 0,
         }
     }
-    // A função fetch() lê uma instrução da memória de texto.
+    /// A função fetch() lê uma instrução da memória de texto.
     pub fn fetch(&mut self) -> () {
         
         self.inst = self.memory.read_text_word(self.pc as usize);
         
     }
-    // A função decode() decodifica uma instrução e atribui os valores aos campos da estrutura RiscvInstruction.
+    /// A função decode() decodifica uma instrução e atribui os valores aos campos da estrutura RiscvInstruction.
     pub fn decode(&mut self, instruction: u32) -> () {
         let opcode = instruction & 0x7F;
         let rd = (instruction >> 7) & 0x1F;
@@ -85,7 +85,7 @@ impl Cpu<'_> {
         self.instruction.imm_u = imm_u;
         self.instruction.imm_j = imm_j;
     }
-    // A função execute() executa uma instrução.
+    /// A função execute() executa uma instrução.
     pub fn execute(&mut self) {
         match self.instruction.opcode {
             0x33 => {
@@ -102,7 +102,7 @@ impl Cpu<'_> {
                         }
                         0x1 => {
                             println!("Instrução MUL");
-                            // O valor do campo funct7 é 0x1, então a instrução é MUL
+                            //O valor do campo funct7 é 0x1, então a instrução é MUL
                             let rs1 = self.breg.get_reg(self.instruction.rs1);
                             let rs2 = self.breg.get_reg(self.instruction.rs2);
                             let rd = rs1 * rs2;
@@ -121,7 +121,7 @@ impl Cpu<'_> {
                         }
                     },
                     0x1 => {
-                        // O valor do campo funct3 é 0x1, então a instrução é SLL
+                       // O valor do campo funct3 é 0x1, então a instrução é SLL
                         println!("Instrução SLL");
                         let rs1 = self.breg.get_reg(self.instruction.rs1);
                         let rs2 = self.breg.get_reg(self.instruction.rs2);
@@ -137,7 +137,7 @@ impl Cpu<'_> {
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
                     0x3 => {
-                        // O valor do campo funct3 é 0x3, então a instrução é SLTU
+                        //O valor do campo funct3 é 0x3, então a instrução é SLTU
                         println!("Instrução SLTU");
                         let rs1 = self.breg.get_reg(self.instruction.rs1) as u32;
                         let rs2 = self.breg.get_reg(self.instruction.rs2) as u32;
@@ -145,7 +145,7 @@ impl Cpu<'_> {
                         self.breg.set_reg(self.instruction.rd, rd);
                     }
                     0x4 => {
-                        // O valor do campo funct3 é 0x4, então a instrução é XOR
+                        //O valor do campo funct3 é 0x4, então a instrução é XOR
                         println!("Instrução XOR");
                         let rs1 = self.breg.get_reg(self.instruction.rs1);
                         let rs2 = self.breg.get_reg(self.instruction.rs2);
