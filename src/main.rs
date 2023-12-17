@@ -21,6 +21,13 @@ use crate::cpu::Memory;
 mod assembler;
 mod cpu;
 
+
+/// A função main() é responsável por chamar o montador, carregar os arquivos binários gerados pelo montador e executar o simulador.
+/// O simulador é composto por uma CPU, um banco de registradores e uma memória.
+/// A CPU é responsável por buscar as instruções na memória, decodificar as instruções, executar as instruções e escrever os resultados no banco de registradores e na memória.
+/// O banco de registradores é responsável por armazenar os valores dos registradores.
+/// A memória é responsável por armazenar as instruções do programa e os dados do programa.
+
 fn main() -> io::Result<()> {
     // Chamando o montador para gerar os arquivos binários
     let args : Vec<String> = std::env::args().collect();

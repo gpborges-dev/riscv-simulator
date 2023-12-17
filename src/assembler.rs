@@ -1,9 +1,10 @@
 use core::panic;
 use std::{collections::HashMap, io::Write};
 
+
 const DATA_ADDR : u32 = 0x00002000; // max 4096 bytes
 const TEXT_ADDR : u32 = 0x00000000; // max 4092 bytes
-
+/// a função recebe uma string que representa um número decimal e retorna uma string que representa o número em binário
 fn u32str_to_bin(dec : &str) -> String {
     if let Ok(d) = dec.parse::<u32>() {
         format!("{:b}", d)
@@ -11,7 +12,7 @@ fn u32str_to_bin(dec : &str) -> String {
         String::from("")
     }
 }
-
+/// get_i32 é uma função que recebe uma string que representa um número decimal ou hexadecimal e retorna um i32
 fn get_i32(num : &str) -> i32 {
     if num.to_lowercase().starts_with("0x") {
         if let Ok(n) = i32::from_str_radix(&num[2..], 16) {
@@ -27,7 +28,7 @@ fn get_i32(num : &str) -> i32 {
         }
     }
 }
-
+/// get_u32 é uma função que recebe uma string que representa um número decimal ou hexadecimal e retorna um u32
 fn get_u32(num : &str) -> u32 {
     if num.to_lowercase().starts_with("0x") {
         if let Ok(n) = u32::from_str_radix(&num[2..], 16) {
@@ -43,7 +44,7 @@ fn get_u32(num : &str) -> u32 {
         }
     }
 }
-
+/// get_u64 é uma função que recebe uma string que representa um número decimal ou hexadecimal e retorna um u64
 fn get_u64(num : &str) -> u64 {
     if num.to_lowercase().starts_with("0x") {
         if let Ok(n) = u64::from_str_radix(&num[2..], 16) {
@@ -59,7 +60,7 @@ fn get_u64(num : &str) -> u64 {
         }
     }
 }
-
+/// is_reg é uma função que recebe uma string e retorna true se ela for um registrador válido e false caso contrário
 fn is_reg(reg : &str) -> bool {
     if let Ok(num) = reg[1..].parse::<u8>() {
         if reg.starts_with('x') && (0..=31).contains(&num) {
@@ -71,7 +72,7 @@ fn is_reg(reg : &str) -> bool {
         false
     }
 }
-
+/// read_escapes é uma função que recebe um vetor de bytes e retorna um vetor de bytes com os escapes convertidos
 fn read_escapes(input: &Vec<u8>) -> Vec<u8> {
     let mut output = Vec::new();
 
@@ -100,7 +101,7 @@ fn read_escapes(input: &Vec<u8>) -> Vec<u8> {
 
     output
 }
-
+/// r_type é uma função que recebe uma string que representa um mnemônico e um vetor de strings que representam os argumentos e retorna uma string que representa a instrução em binário
 fn r_type(mnemonic : &str, args : &Vec<&str>) -> String {
     if args.len() != 3 || !is_reg(&args[0]) || !is_reg(&args[1]) || !is_reg(&args[2]) {
         panic!{"Arguments {:?} invalid for {mnemonic}", args}
@@ -128,7 +129,7 @@ fn r_type(mnemonic : &str, args : &Vec<&str>) -> String {
     
     format!("{funct7}{rs2}{rs1}{funct3}{rd}{opcode}\n")
 }
-
+/// i_type é uma função que recebe uma string que representa um mnemônico e um vetor de strings que representam os argumentos e retorna uma string que representa a instrução em binário
 fn i_type(mnemonic : &str, args : &Vec<&str>) -> String {
     let mut imm : String = String::new();
     let mut rs1 : String = String::new();
@@ -205,7 +206,7 @@ fn i_type(mnemonic : &str, args : &Vec<&str>) -> String {
 
     format!("{}{}{}{}{}\n", imm, rs1, funct3, rd, opcode)
 }
-
+/// s_type é uma função que recebe uma string que representa um mnemônico e um vetor de strings que representam os argumentos e retorna uma string que representa a instrução em binário
 fn s_type(mnemonic : &str, args : &Vec<&str>) -> String {
     if args.len() != 2 {
         panic!("Arguments {:?} invalid for {mnemonic}", args) 
@@ -248,7 +249,7 @@ fn s_type(mnemonic : &str, args : &Vec<&str>) -> String {
 
     format!("{}{}{}{}{}{}\n", &imm[0..=6], rs2, rs1, funct3, &imm[7..], opcode)
 }
-
+/// b_type é uma função que recebe uma string que representa um mnemônico e um vetor de strings que representam os argumentos e retorna uma string que representa a instrução em binário
 fn b_type(mnemonic : &str, args : &Vec<&str>, text_hash : &HashMap<String, u32>, inst_addr : &u32) -> String {
     if args.len() != 3 || !is_reg(&args[0]) || !is_reg(&args[1]) || !text_hash.contains_key(args[2]) {
         panic!("Arguments {:?} invalid for {mnemonic}", args)
@@ -275,7 +276,7 @@ fn b_type(mnemonic : &str, args : &Vec<&str>, text_hash : &HashMap<String, u32>,
     let imm : String = format!("{:0>32b}", offset);
     format!("{}{}{}{}{}{}{}{}\n", &imm.chars().nth(19).unwrap(), &imm[21..=26], rs2, rs1, funct3, &imm[27..=30], &imm.chars().nth(20).unwrap(), opcode)
 }
-
+/// u_type é uma função que recebe uma string que representa um mnemônico e um vetor de strings que representam os argumentos e retorna uma string que representa a instrução em binário
 fn u_type(mnemonic : &str, args : &Vec<&str>) -> String {
     if args.len() != 2 || !is_reg(&args[0]) {
         panic!("Arguments {:?} invalid for {mnemonic}", args)
@@ -296,7 +297,7 @@ fn u_type(mnemonic : &str, args : &Vec<&str>) -> String {
 
     format!("{imm}{rd}{opcode}\n")
 }
-
+/// j_type é uma função que recebe uma string que representa um mnemônico e um vetor de strings que representam os argumentos e retorna uma string que representa a instrução em binário
 fn j_type(mnemonic : &str, args : &Vec<&str>, text_hash : &HashMap<String, u32>, inst_addr : &u32) -> String {
     if args.len() != 2 && is_reg(&args[0]) && !text_hash.contains_key(args[2]) {
         panic!("Arguments {:?} invalid for {mnemonic}", args)
@@ -312,7 +313,7 @@ fn j_type(mnemonic : &str, args : &Vec<&str>, text_hash : &HashMap<String, u32>,
     let imm : String = format!("{:0>32b}", offset);
     format!("{}{}{}{}{}{}\n", &imm.chars().nth(11).unwrap(), &imm[21..=30], &imm.chars().nth(20).unwrap(), &imm[12..=19], rd, opcode)
 }
-
+/// format_code é uma função que recebe uma string que representa o código assembly e retorna uma string que representa o código assembly formatado
 fn format_code(code: &str) -> String {
     let mut formated_code : String = String::new();
     for line in code.split("\r\n") {
@@ -331,7 +332,7 @@ fn format_code(code: &str) -> String {
     }
     formated_code
 }
-
+/// split_segments é uma função que recebe uma string que representa o código assembly e retorna uma tupla de vetores de strings que representam os segmentos .data e .text
 fn split_segments(code: &str) -> (Vec<&str>, Vec<&str>) {
     let data_index: Option<usize> = code.find(".data");
     let text_index: Option<usize> = code.find(".text");
@@ -348,7 +349,7 @@ fn split_segments(code: &str) -> (Vec<&str>, Vec<&str>) {
         _ => panic!("Code segment not found")
     }
 }
-
+/// is_label é uma função que recebe uma string que representa uma label e retorna true se ela for válida e false caso contrário
 fn is_label(label : &str) -> bool {
     if label.starts_with(|c: char| c.is_numeric()) {
         false // a label começa com número
@@ -360,7 +361,7 @@ fn is_label(label : &str) -> bool {
         }
     }
 }
-
+/// get_data_size é uma função que recebe uma string que representa um dado e retorna um u32 que representa o tamanho do dado
 fn get_data_size(data : &mut &str) -> u32 {
     let line : Vec<&str> = data.splitn(2," ").collect();
     if line.len() == 2 {
@@ -486,7 +487,7 @@ fn get_data_size(data : &mut &str) -> u32 {
         panic!("{data} is from a invalid type")
     }
 }
-
+/// sub_labels é uma função que recebe uma string que representa o código assembly e retorna uma tupla de HashMaps que representam as labels do segmento .data e .text
 fn sub_labels(data : &mut Vec<&str>, text : &mut Vec<&str>) -> (HashMap<String, u32>, HashMap<String, u32>) {
     let mut data_hash : HashMap<String, u32> = HashMap::new();
     let mut text_hash : HashMap<String, u32> = HashMap::new();
@@ -555,11 +556,9 @@ fn sub_labels(data : &mut Vec<&str>, text : &mut Vec<&str>) -> (HashMap<String, 
         }
         // println!("{current_offset}");
     }
-    // println!("{:?}", data_hash);
-    // println!("{:?}", text_hash);
     (data_hash, text_hash)
 }
-
+/// translator é uma função que recebe uma string que representa o código assembly e retorna uma tupla de strings que representam os binários dos segmentos .data e .text
 fn translator(data: &Vec<&str>, text : &Vec<&str>, data_hash : &HashMap<String, u32>, text_hash : &HashMap<String, u32>) -> (String, String) {
     let r_mnemonics = ["add", "sub", "sll", "slt", "sltu", "xor", "srl", "sra", "or", "and"];
     let i_mnemonics = ["addi", "addi", "slti", "sltiu", "xori", "ori", "andi", "slli", "srli", "srai", "jalr", "lb", "lh", "lw", "lbu", "lhu"];
@@ -639,7 +638,7 @@ fn translator(data: &Vec<&str>, text : &Vec<&str>, data_hash : &HashMap<String, 
 
     (formatedatabin, textbinaries.trim_end_matches("\n").to_string())
 }
-
+/// assemble é uma função que recebe uma string que representa o caminho do arquivo assembly e retorna uma tupla de strings que representam os binários dos segmentos .data e .text
 pub fn assemble(path: &str) {
     let content: String = std::fs::read_to_string(path).expect("Couldn't read file");
     let formated_content: String = format_code(&content);
