@@ -1,3 +1,11 @@
+//! # Assembler
+//! Este módulo é responsável por traduzir o código assembly para binário.
+//! O código assembly deve estar na pasta raiz do projeto.
+//! Os arquivos binários gerados pelo montador estarão na pasta raiz do projeto.
+//! O arquivo bin_data.txt contém os dados do programa e o arquivo bin_text.txt contém as instruções do programa.
+
+
+
 use core::panic;
 use std::{collections::HashMap, io::Write};
 
