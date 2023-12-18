@@ -4,6 +4,9 @@ Montador e simulador Assembly RISC-V.
 cargo run -- caminho-do-arquivo-assembly
 ### Exemplo
 cargo run -- assembly\teste_simulador.txt
+### Observações
+Os registradores utilizados no programa Assembly devem estar na forma x0,x1...x31.
+Comentários não são aceitos pelo montador.
 ## Documentação / Site do projeto
 cargo doc --open
 ## Versão utilizada
