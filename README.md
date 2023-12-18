@@ -18,4 +18,31 @@ Mesmo sendo um projeto patrocinado pela Mozilla, este é um open community proje
 A linguagem levou um grande melhoramento através do feedback obtido pela experiência de desenvolvimento da escrita do Servo, um browser engine moderno e de elevada performance, desenhado para aplicações e uso embebido. Atualmente, grande parte dos commits são de membros da comunidade.
 
 Rust ganhou o primeiro lugar da linguagem mais amada de 2016 num inquérito realizado pelo Stack Overflow.
+## Premissas principais
+
+Segurança e Confiabilidade: Rust foi projetada para garantir a segurança do código, eliminando muitos tipos comuns de erros de programação, como acessos inválidos à memória e condições de corrida.
+
+Performance: A linguagem busca fornecer desempenho próximo ao código nativo, permitindo controle fino sobre os recursos de hardware, sem comprometer a segurança.
+
+Concorrência: Rust facilita a construção de programas concorrentes e paralelos, garantindo segurança em operações multi-threaded.
+
+## Usuários
+
+O Rust é atraente para diversos perfis de desenvolvedores e para uma variedade de casos de uso:
+
+Desenvolvedores de sistemas e aplicativos de baixo nível: Pode ser usado para criar desde sistemas operacionais até aplicações de rede e sistemas embarcados.
+
+Web e Servidores: Com ferramentas modernas como o Rocket, Rust está se tornando popular para desenvolvimento web e para a construção de servidores seguros e de alto desempenho.
+
+Jogos e Gráficos: Rust oferece um desempenho excepcional e é usado em algumas bibliotecas e engines de jogos.
+
+## Domínio
+
+O Rust é uma linguagem de programação de propósito geral, o que significa que pode ser aplicada em várias áreas:
+
+Sistemas Operacionais: Rust é adequado para construir sistemas operacionais devido à sua segurança e desempenho.
+
+IoT e Embarcados: Por ser uma linguagem de baixo nível com garantias de segurança, é uma escolha interessante para dispositivos IoT.
+
+Ferramentas de Segurança: A linguagem é adotada para desenvolver ferramentas de segurança devido à sua capacidade de prevenir erros de programação comuns.
 
