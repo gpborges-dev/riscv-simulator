@@ -10,4 +10,3 @@ addi x17, x0, 93
 ecall
 .data
 helloworld: .ascii "Hello World!\n"
-

@@ -1,0 +1,46 @@
+.data
+helloworld: .ascii "Hello World!\n"
+num1: .word 5
+num2: .word 2
+.text
+auipc x5, 64528
+lw x5, 16(x5)
+auipc x6, 64528
+lw x6, 12(x6)
+sub x7, x5, x6
+sll x7, x5, x6
+slt x7, x5, x6
+sltu x7, x5, x6
+sra x7, x5, x6
+srl x7, x5, x6
+and x7, x5, x6
+or x7, x5, x6
+slti x7, x5, 2
+sltiu x7, x5, -3
+xori x7, x5, 0x50
+ori x7, x5, 0xFF
+andi x7, x5, 0
+slli x7, x6, 8
+srli x7, x5, 4
+srai x7, x6, 6
+beq x0, x0, pula1
+add x0, x0, x0
+add x0, x0, x0
+pula1:
+jal x5, pula2
+exit:
+auipc x10, 64528
+addi x10, x10, -96
+addi x17, x0, 4
+ecall
+addi x17, x0, 10
+ecall
+pula2:
+beq x5, x6, exit
+addi x5, x0, 10
+addi x6, x0, -8
+auipc x7, 64528
+sw x5, -100(x7)
+auipc x7, 64528
+sw x6, -104(x7)
+bne x5, x6, exit

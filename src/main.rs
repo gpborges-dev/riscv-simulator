@@ -37,8 +37,8 @@ fn main() -> io::Result<()> {
     println!("Arquivo binário gerado com sucesso!");
     
     // Carregando o arquivo binário gerado pelo montador
-    let file = File::open("teste_aritmetico_text.txt")?;
-    let file2 = File::open("bin_data.txt")?;
+    let file = File::open("binaries/bin_text.txt")?;
+    let file2 = File::open("binaries/bin_data.txt")?;
     let reader = io::BufReader::new(file);
     let reader2 = io::BufReader::new(file2);
     //instanciação da memória e dos registradores
