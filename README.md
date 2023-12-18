@@ -5,7 +5,7 @@
 - Arthur Souza - 200014978
 - Marcelo Piano - 200049496
 ## Como executar
-basta ter o Rust instalado e rodar:
+basta ter o Rust instalado e rodar o comando:
 ```bash
 cargo run -- caminho-do-arquivo-assembly
 ```
