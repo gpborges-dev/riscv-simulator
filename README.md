@@ -18,6 +18,7 @@ Os registradores utilizados no programa Assembly devem estar na forma x0,x1...x3
 O montador reconhece apenas instruções da ISA RV32I.
 O código assembly não pode conter comentários nem pseudoinstruções para ser executado corretamente.
 ## Documentação / Site do projeto
+para acessar a documentação basta rodar o comando:
 ```bash
 cargo doc --open
 ```
