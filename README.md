@@ -1,7 +1,7 @@
 # Título do Projeto
-Montador e simulador Assembly risc-v.
+Montador e simulador Assembly RISC-V.
 ## Para testar
-cargo run -- <caminho-do-arquivo-assembly>
+cargo run -- caminho-do-arquivo-assembly
 ### Exemplo
 cargo run -- assembly\teste_simulador.txt
 ## Documentação / Site do projeto
