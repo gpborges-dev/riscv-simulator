@@ -71,4 +71,72 @@ Por exemplo, uma macro chamada pessoa! poderia ser usada para criar uma nova ins
 
 ## Legibilidade
 
+### Sintaxe Clara: 
+A linguagem tem uma sintaxe organizada e consistente, facilitando a compreensão do código.
+
+### Mensagens de Erro Explicativas: 
+Quando há problemas, as mensagens de erro detalhadas ajudam a entender e corrigir os problemas mais facilmente.
+
+### Nomenclatura Descritiva:
+Rust incentiva nomes claros e autoexplicativos para variáveis e funções, melhorando a compreensão do código.
+
+### Documentação Integrada:
+A capacidade de incluir documentação diretamente no código facilita a compreensão do propósito e funcionamento de cada parte.
+
+### Ferramentas de Formatação:
+O Rustfmt mantém um estilo de código consistente, ajudando na legibilidade ao padronizar a formatação.
+
+## Capacidade de escrita
+
+
+### Expressividade e Abstração:
+A linguagem permite escrever código de forma concisa e reutilizável usando recursos como traits e generics.
+
+### Ferramentas e Ecossistema:
+O Rust oferece ferramentas como Cargo, Rustfmt e Clippy, além de uma variedade de bibliotecas, facilitando a escrita e manutenção do código.
+
+### Segurança e Feedback Rápido:
+Embora priorize a segurança, Rust não compromete a produtividade, oferecendo feedback rápido durante o desenvolvimento para identificar erros.
+
+### Curva de Aprendizado Inicial:
+Inicialmente desafiador devido ao sistema de tipos robusto, mas a fluidez na escrita de código melhora à medida que se familiariza com os conceitos do Rust.
+
+## Confiabilidade
+
+### Segurança de Memória:
+Rust previne segfaults, vazamentos de memória e erros de uso após liberação de memória (use-after-free).
+
+### Concorrência Segura:
+Evita condições de corrida e oferece segurança em operações concorrentes.
+
+### Controle de Mutabilidade:
+Regras claras sobre mutabilidade evitam alterações inesperadas nos dados.
+
+### Análise Estática:
+O compilador realiza verificações durante a compilação para identificar erros antes da execução do código.
+
+### Práticas de Programação Segura:
+Incentiva boas práticas para gerenciamento de memória, tratamento de erros e operações concorrentes.
+
+### Desempenho Confiable:
+Mantém um alto desempenho próximo ao código nativo, mesmo com suas garantias de segurança.
+
+## Custo de Aprendizado:
+### Curva de Aprendizado:
+Rust pode ter uma curva de aprendizado íngreme, especialmente para programadores novos na linguagem. Entender o sistema de tipos, o conceito de propriedade (ownership) e as regras de empréstimo (borrowing) pode exigir tempo extra inicialmente.
+## Custo de Desenvolvimento:
+### Rigor na Segurança:
+Rust exige um código mais seguro e robusto, o que pode levar mais tempo durante o desenvolvimento para garantir que o código siga as regras de propriedade, empréstimo e mutabilidade.
+
+### Verificações Estáticas:
+O compilador realiza verificações rigorosas durante a compilação, o que pode exigir ajustes e correções no código para atender aos requisitos de segurança.
+
+## Custo de Desempenho:
+### Overhead de Segurança:
+Algumas medidas de segurança adicionais em Rust podem gerar um pequeno overhead em comparação com linguagens que não têm as mesmas garantias de segurança.
+### Benefícios e Equilíbrio:
+Trade-off: O custo inicial mais alto em termos de aprendizado e rigor na escrita de código é compensado pelos benefícios de segurança, confiabilidade e desempenho próximo ao código nativo que Rust oferece.
+Em resumo, o "custo" em Rust pode envolver um período inicial de aprendizado mais desafiador, exigir práticas mais rigorosas de desenvolvimento para garantir a segurança do código e, em alguns casos, pode ter um pequeno overhead de desempenho. No entanto, esses custos são geralmente compensados pelos benefícios de segurança e confiabilidade que a linguagem proporciona.
+
+
 
