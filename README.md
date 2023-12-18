@@ -1,9 +1,9 @@
 # Montador e simulador Assembly RISC-V
 
 ## Integrantes
-Gabriel Borges - 202006401
-Arthur Souza - 200014978
-Marcelo Piano - 200049496
+- Gabriel Borges - 202006401
+- Arthur Souza - 200014978
+- Marcelo Piano - 200049496
 ## Como executar
 basta ter o Rust instalado e rodar:
 ```bash
