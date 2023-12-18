@@ -1,3 +1,4 @@
+//! # Memória
 //! Temos aqui a implementação da memória do Riscv, que é dividida em duas partes: a memória de texto e a memória de dados.
 //! A memória de texto é onde ficam armazenadas as instruções do programa, enquanto a memória de dados é onde ficam armazenados os dados do programa.
 //! As duas memórias são implementadas como vetores de 32 bits, onde cada posição do vetor representa uma palavra de 32 bits.	

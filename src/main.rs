@@ -98,7 +98,7 @@ fn main() -> io::Result<()> {
         cpu.decode(cpu.inst);
         cpu.breg.print_reg();
         cpu.execute();
-        if(cpu.instruction.opcode != 0x67 && cpu.instruction.opcode != 0x63 && cpu.instruction.opcode != 0x6f){
+        if cpu.instruction.opcode != 0x67 && cpu.instruction.opcode != 0x63 && cpu.instruction.opcode != 0x6f {
             cpu.pc += 1;
         }
     }

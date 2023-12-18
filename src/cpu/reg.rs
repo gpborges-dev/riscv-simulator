@@ -1,3 +1,4 @@
+//! # Registradores
 //! Neste arquivo estão as definições do banco de registradores da CPU.
 //! O banco de registradores é um vetor de 32 posições, cada posição representa um registrador.
 // Os registradores são:

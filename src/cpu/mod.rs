@@ -1,3 +1,5 @@
+//! CPU
+//! ================================================
 //! Este módulo respresenta a CPU do processador Risc-v, onde são utilizados registradores e memória, além das funções de fetch, decode e execute.
 
 
@@ -566,25 +568,25 @@ impl Cpu<'_> {
                                 let mut value = self.memory.read_data_word(address);
                                 println!("value: {}", value);
                                 
-                                while(size > 0){
+                                while size > 0 {
                                     print!("{}", ((value >> 24) & 0x000000FF) as u8 as char);
                                     size -= 1;
-                                    if(size <= 0){
+                                    if size <= 0 {
                                         break;
                                     }
                                     print!("{}", ((value >> 16) & 0xFF) as u8 as char);
                                     size -= 1;
-                                    if(size <= 0){
+                                    if size <= 0 {
                                         break;
                                     }
                                     print!("{}", ((value >> 8) & 0xFF) as u8 as char);
                                     size -= 1;
-                                    if(size <= 0){
+                                    if size <= 0 {
                                         break;
                                     }
                                     print!("{}", (value & 0xFF) as u8 as char);
                                     size -= 1;
-                                    if(size <= 0){
+                                    if size <= 0 {
                                         break;
                                     }
                                     address += 1;
