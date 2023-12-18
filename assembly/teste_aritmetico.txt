@@ -1,0 +1,54 @@
+.text
+addi x10, x0, 10
+addi x11, x0, 20
+add  x12, x10, x11
+add x10, x0, x15
+addi x17, x0, 1
+ecall
+
+addi x10, x0, 10
+addi x17, x0, 11
+ecall
+
+addi x13, x0, 30
+addi x14, x0, 15
+sub  x15, x13, x14
+add x10, x0, x15
+addi x17, x0, 1
+ecall
+
+addi x10, x0, 10
+addi x17, x0, 11
+ecall
+
+addi x10, x0, 4
+addi x11, x0, 2
+sll  x12, x10, x11
+add x10, x0, x12
+addi x17, x0, 1
+ecall
+
+addi x10, x0, 10
+addi x17, x0, 11
+ecall
+
+addi x13, x0, 7
+addi x14, x0, 11
+xor  x15, x13, x14
+add x10, x0, x15
+addi x17, x0, 1
+ecall
+
+addi x10, x0, 10
+addi x17, x0, 11
+ecall
+
+addi x16, x0, 15
+addi x17, x0, 7
+and  x9, x16, x17
+add x10, x0, x9
+addi x17, x0, 1
+ecall
+
+addi x17, x0, 10
+ecall
