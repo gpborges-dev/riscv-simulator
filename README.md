@@ -6,7 +6,7 @@ cargo run -- caminho-do-arquivo-assembly
 cargo run -- assembly\teste_simulador.txt
 ## Documentação / Site do projeto
 cargo doc --open
-## Versão
+## Versão utilizada
 cargo 1.74.1
 ## Histórico
 A linguagem surgiu como projeto pessoal de um empregado da Mozilla, Graydon Hoare. A Mozilla começou a financiar o projeto em 2009, depois de perceber o potencial do mesmo. Só em 2010 é que fez um anuncio publico. No mesmo ano, em que o compilador inicial (escrito em OCaml) é rescrito para Rust. Conhecido como rustc, este consegui compilar-se a si próprio em 2011, usando o LLVM como back end.
