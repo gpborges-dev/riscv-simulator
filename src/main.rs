@@ -1,10 +1,9 @@
-//! Introdução
-//! ===============================
 //! Montador e simulador de processador RISC-V
 //! ===============================           
-//! Para executar o simulador, basta usar o comando cargo run nome-do-arquivo-assembly no terminal.
-//! O arquivo assembly deve estar na pasta raiz do projeto.
-//! Os arquivos binários gerados pelo montador estarão na pasta raiz do projeto.
+//! Para executar o simulador, basta usar o comando cargo run caminho-do-arquivo no terminal.
+//! Os registradores precisam estar no formato x0, x1, x2, ..., x31.
+//! O montador não aceita comentários.
+//! Os arquivos binários gerados pelo montador estarão na pasta binaries.
 //! O arquivo bin_data.txt contém os dados do programa e o arquivo bin_text.txt contém as instruções do programa.
 
 
@@ -105,3 +104,4 @@ fn main() -> io::Result<()> {
 
     Ok(())
 }
+
