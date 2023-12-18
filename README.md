@@ -1,14 +1,27 @@
 # Título do Projeto
 Montador e simulador Assembly RISC-V.
-## Para testar
+
+## Integrantes
+Gabriel Borges - 202006401
+Arthur Souza - 200014978
+Marcelo Piano - 200049496
+## Como executar
+basta ter o Rust instalado e rodar:
+```bash
 cargo run -- caminho-do-arquivo-assembly
-### Exemplo
-cargo run -- assembly\teste_simulador.txt
+```
+## Exemplo
+```bash
+cargo run -- assembly/teste_simulador.txt
+```
 ### Observações
 Os registradores utilizados no programa Assembly devem estar na forma x0,x1...x31.
-Comentários não são aceitos pelo montador.
+O montador reconhece apenas instruções da ISA RV32I.
+O código assembly não pode conter comentários nem pseudoinstruções para ser executado corretamente.
 ## Documentação / Site do projeto
+```bash
 cargo doc --open
+```
 ## Versão utilizada
 cargo 1.74.1
 ## Histórico
