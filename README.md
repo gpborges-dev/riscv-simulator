@@ -46,3 +46,31 @@ IoT e Embarcados: Por ser uma linguagem de baixo nível com garantias de seguran
 
 Ferramentas de Segurança: A linguagem é adotada para desenvolver ferramentas de segurança devido à sua capacidade de prevenir erros de programação comuns.
 
+## Construtores
+
+Em Rust, os "construtores" não são um recurso explícito como em algumas outras linguagens de programação, como Java ou Python, onde existe um método especial chamado "construtor".
+
+Em Rust, você pode criar uma estrutura de dados (como uma struct) e inicializá-la de algumas maneiras:
+
+Inicialização Direta:
+Você pode criar uma instância da estrutura e definir os valores de seus campos imediatamente durante a criação:
+
+Por exemplo, para uma estrutura Pessoa com campos nome e idade, você pode criar uma nova instância assim:
+
+"Crie uma pessoa com o nome 'Alice' e idade 30."
+
+Métodos Associados:
+É possível definir métodos dentro de um bloco impl para a estrutura. Esses métodos associados servem como construtores personalizados, permitindo a criação de instâncias da estrutura com valores específicos:
+
+Por exemplo, para uma estrutura Pessoa:
+
+"Crie uma função 'nova' que recebe um nome e uma idade, e retorne uma nova instância de Pessoa com esses valores."
+
+Macros:
+Rust oferece macros que podem gerar código repetitivo. Você pode criar macros para criar instâncias de estruturas com valores pré-definidos:
+
+Por exemplo, uma macro chamada pessoa! poderia ser usada para criar uma nova instância de Pessoa com valores passados como argumentos para a macro.
+
+## Legibilidade
+
+
