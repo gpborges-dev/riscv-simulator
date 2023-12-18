@@ -1,5 +1,4 @@
-# Título do Projeto
-Montador e simulador Assembly RISC-V.
+# Montador e simulador Assembly RISC-V
 
 ## Integrantes
 Gabriel Borges - 202006401
